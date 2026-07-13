@@ -18,6 +18,16 @@
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
     <title>Javlonbek Rustamov — AI Engineer & Fullstack Developer</title>
+    <script>
+      try {
+        const requestedTheme = new URLSearchParams(location.search).get("theme");
+        document.documentElement.dataset.theme = ["light", "dark"].includes(requestedTheme)
+          ? requestedTheme
+          : localStorage.getItem("portfolio-theme") || "dark";
+      } catch {
+        document.documentElement.dataset.theme = "dark";
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

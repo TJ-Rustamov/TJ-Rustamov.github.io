@@ -1,11 +1,14 @@
 import { useEffect, useRef } from "react";
 
-const COLORS = {
-  lime: [202, 255, 56],
-  limeSoft: [184, 255, 74],
-  violet: [168, 85, 247],
-  violetDeep: [109, 40, 217],
-  lavender: [221, 214, 254],
+const PALETTES = {
+  dark: {
+    lime: [202, 255, 56], limeSoft: [184, 255, 74], violet: [168, 85, 247],
+    violetDeep: [109, 40, 217], lavender: [221, 214, 254], background: [7, 5, 17],
+  },
+  light: {
+    lime: [238, 105, 75], limeSoft: [63, 114, 89], violet: [73, 125, 99],
+    violetDeep: [41, 76, 59], lavender: [102, 112, 106], background: [244, 240, 232],
+  },
 };
 
 const NODE_LAYOUT = [
@@ -49,7 +52,7 @@ const LINKS = [
   [22, 23, -.06], [23, 24, .09], [24, 25, -.05],
 ];
 
-const PARTICLE_COLORS = [COLORS.lime, COLORS.violet, COLORS.violetDeep, COLORS.lavender];
+const PARTICLE_COLOR_KEYS = ["lime", "violet", "violetDeep", "lavender"];
 const randomBetween = (min, max) => min + Math.random() * (max - min);
 
 const rgba = ([r, g, b], alpha) => `rgba(${r},${g},${b},${alpha})`;
@@ -80,6 +83,7 @@ export default function AmbientNetwork() {
     let lastScrollY = window.scrollY;
     let scrollImpulse = 0;
     let visible = !document.hidden;
+    let palette = document.documentElement.dataset.theme === "light" ? PALETTES.light : PALETTES.dark;
 
     const createScene = () => {
       const area = width * height;
@@ -90,7 +94,7 @@ export default function AmbientNetwork() {
         vx: randomBetween(-.08, .08),
         vy: randomBetween(-.06, .06),
         radius: index % 8 === 0 ? randomBetween(2.2, 3.4) : randomBetween(.8, 1.9),
-        color: PARTICLE_COLORS[index % PARTICLE_COLORS.length],
+        color: PARTICLE_COLOR_KEYS[index % PARTICLE_COLOR_KEYS.length],
         phase: Math.random() * Math.PI * 2,
       }));
       structuredNodes = NODE_LAYOUT.map((node, index) => ({
@@ -142,16 +146,16 @@ export default function AmbientNetwork() {
       const centerY = height * .48 + Math.cos(time * .00016) * 9;
       const radius = size * .24;
       const halo = context.createRadialGradient(centerX - radius * .18, centerY - radius * .18, radius * .08, centerX, centerY, radius);
-      halo.addColorStop(0, "rgba(124,58,237,.5)");
-      halo.addColorStop(.5, "rgba(76,29,149,.28)");
-      halo.addColorStop(1, "rgba(7,5,17,0)");
+      halo.addColorStop(0, rgba(palette.violet, .34));
+      halo.addColorStop(.5, rgba(palette.violetDeep, .2));
+      halo.addColorStop(1, rgba(palette.background, 0));
       context.fillStyle = halo;
       context.beginPath();
       context.arc(centerX, centerY, radius, 0, Math.PI * 2);
       context.fill();
 
       for (let ring = 0; ring < 3; ring += 1) {
-        context.strokeStyle = ring === 1 ? "rgba(202,255,56,.15)" : "rgba(168,85,247,.22)";
+        context.strokeStyle = ring === 1 ? rgba(palette.lime, .15) : rgba(palette.violet, .22);
         context.lineWidth = .8;
         context.beginPath();
         context.ellipse(centerX, centerY, radius * (1 + ring * .22), radius * (.78 + ring * .15), time * .00004 + ring * .42, 0, Math.PI * 2);
@@ -159,9 +163,9 @@ export default function AmbientNetwork() {
       }
 
       const bottomGradient = context.createLinearGradient(0, height * .7, 0, height);
-      bottomGradient.addColorStop(0, "rgba(76,29,149,0)");
-      bottomGradient.addColorStop(.45, "rgba(76,29,149,.2)");
-      bottomGradient.addColorStop(1, "rgba(124,58,237,.42)");
+      bottomGradient.addColorStop(0, rgba(palette.violetDeep, 0));
+      bottomGradient.addColorStop(.45, rgba(palette.violetDeep, .14));
+      bottomGradient.addColorStop(1, rgba(palette.violet, .3));
       context.fillStyle = bottomGradient;
       context.beginPath();
       context.moveTo(width * .38 + shift, height);
@@ -172,7 +176,7 @@ export default function AmbientNetwork() {
       context.fill();
 
       for (let line = 0; line < 6; line += 1) {
-        context.strokeStyle = `rgba(168,85,247,${.07 + line * .012})`;
+        context.strokeStyle = rgba(palette.violet, .07 + line * .012);
         context.lineWidth = .7;
         context.beginPath();
         context.moveTo(width * .35 + shift, height * (.92 + line * .015));
@@ -216,7 +220,7 @@ export default function AmbientNetwork() {
         };
         const isLime = index % 7 === 0;
         const dotted = index % 6 === 2;
-        context.strokeStyle = isLime ? "rgba(202,255,56,.3)" : "rgba(139,92,246,.42)";
+        context.strokeStyle = isLime ? rgba(palette.lime, .3) : rgba(palette.violet, .42);
         context.lineWidth = isLime ? 1.2 : 1;
         context.setLineDash(dotted ? [2, 9] : []);
         context.lineDashOffset = dotted ? -time * .018 : 0;
@@ -230,8 +234,8 @@ export default function AmbientNetwork() {
           const t = (time * .00012 + index * .17) % 1;
           const pulse = quadraticPoint(from, control, to, t);
           context.shadowBlur = 13;
-          context.shadowColor = isLime ? "#caff38" : "#a855f7";
-          context.fillStyle = isLime ? "rgba(202,255,56,.95)" : "rgba(216,180,254,.9)";
+          context.shadowColor = rgba(isLime ? palette.lime : palette.violet, .95);
+          context.fillStyle = rgba(isLime ? palette.lime : palette.lavender, .9);
           context.beginPath();
           context.arc(pulse.x, pulse.y, 2.4, 0, Math.PI * 2);
           context.fill();
@@ -242,7 +246,7 @@ export default function AmbientNetwork() {
 
     const drawStructuredNodes = (time) => {
       structuredNodes.forEach((node) => {
-        const color = COLORS[node.color];
+        const color = palette[node.color];
         const pulse = 1 + Math.sin(time * .0014 + node.phase) * .16;
         const radius = node.r * pulse;
         context.shadowBlur = node.color.startsWith("lime") ? 20 : 14;
@@ -270,8 +274,8 @@ export default function AmbientNetwork() {
       const spacing = (endX - startX) / bars;
       context.save();
       context.shadowBlur = 15;
-      context.shadowColor = "rgba(202,255,56,.65)";
-      context.strokeStyle = "rgba(202,255,56,.72)";
+      context.shadowColor = rgba(palette.lime, .65);
+      context.strokeStyle = rgba(palette.lime, .72);
       context.lineWidth = width < 760 ? 2 : 2.6;
       for (let index = 0; index < bars; index += 1) {
         const normalized = index / Math.max(1, bars - 1);
@@ -285,7 +289,7 @@ export default function AmbientNetwork() {
         context.stroke();
       }
       context.restore();
-      context.strokeStyle = "rgba(168,85,247,.32)";
+      context.strokeStyle = rgba(palette.violet, .32);
       context.lineWidth = 1;
       context.beginPath();
       context.moveTo(startX - 55, centerY);
@@ -315,7 +319,7 @@ export default function AmbientNetwork() {
         if (particle.y < -15) particle.y = height + 15;
         if (particle.y > height + 15) particle.y = -15;
         const alpha = .36 + Math.sin(time * .0015 + particle.phase) * .18;
-        context.fillStyle = rgba(particle.color, alpha);
+        context.fillStyle = rgba(palette[particle.color], alpha);
         context.beginPath();
         context.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
         context.fill();
@@ -323,6 +327,7 @@ export default function AmbientNetwork() {
     };
 
     const renderScene = (time, delta, interactive = true) => {
+      palette = document.documentElement.dataset.theme === "light" ? PALETTES.light : PALETTES.dark;
       context.clearRect(0, 0, width, height);
       scrollImpulse *= .92;
       const shift = sceneShiftFor(time);
@@ -358,6 +363,11 @@ export default function AmbientNetwork() {
       if (visible) renderMotionPreference();
     };
 
+    const themeObserver = new MutationObserver(() => {
+      palette = document.documentElement.dataset.theme === "light" ? PALETTES.light : PALETTES.dark;
+      if (reducedMotion.matches) renderScene(0, 0, false);
+    });
+
     resize();
     window.addEventListener("resize", resize);
     window.addEventListener("pointermove", onPointerMove, { passive: true });
@@ -365,6 +375,7 @@ export default function AmbientNetwork() {
     window.addEventListener("scroll", onScroll, { passive: true });
     document.addEventListener("visibilitychange", onVisibility);
     reducedMotion.addEventListener("change", renderMotionPreference);
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
     renderMotionPreference();
 
     return () => {
@@ -375,6 +386,7 @@ export default function AmbientNetwork() {
       window.removeEventListener("scroll", onScroll);
       document.removeEventListener("visibilitychange", onVisibility);
       reducedMotion.removeEventListener("change", renderMotionPreference);
+      themeObserver.disconnect();
     };
   }, []);
 

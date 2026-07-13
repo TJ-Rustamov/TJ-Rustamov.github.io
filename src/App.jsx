@@ -37,6 +37,19 @@ const VoiceWaveform = () => {
   );
 };
 
+const ThemeIcon = ({ theme }) => (
+  <svg className="theme-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+    {theme === "dark" ? (
+      <>
+        <circle cx="12" cy="12" r="3.5" stroke="currentColor" strokeWidth="1.7" />
+        <path d="M12 2.5v2M12 19.5v2M21.5 12h-2M4.5 12h-2M18.72 5.28l-1.42 1.42M6.7 17.3l-1.42 1.42M18.72 18.72l-1.42-1.42M6.7 6.7 5.28 5.28" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" />
+      </>
+    ) : (
+      <path d="M20.35 15.15A8.5 8.5 0 0 1 8.85 3.65 8.5 8.5 0 1 0 20.35 15.15Z" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" />
+    )}
+  </svg>
+);
+
 const projects = [
   {
     number: "01",
@@ -123,6 +136,13 @@ const principles = [
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState(() => document.documentElement.dataset.theme || "dark");
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("portfolio-theme", theme);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f4f0e8" : "#070511");
+  }, [theme]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -168,6 +188,16 @@ function App() {
           <a href="#work" onClick={() => setMenuOpen(false)}>Work</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
           <a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a>
+          <button
+            className="theme-toggle"
+            type="button"
+            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
+            aria-pressed={theme === "light"}
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+          >
+            <ThemeIcon theme={theme} />
+            <span>{theme === "dark" ? "Light" : "Dark"}</span>
+          </button>
           <a className="nav-cta" href="#contact" onClick={() => setMenuOpen(false)}>Let’s talk <ArrowUpRight size={16} /></a>
         </nav>
       </header>
@@ -287,7 +317,12 @@ function App() {
             <h2>Have a hard problem where AI could make a real difference?</h2>
             <p>I’m interested in mission-driven AI work, production agent systems, and teams that care about what happens after the demo.</p>
             <div className="contact-actions">
-              <a className="button button-light" href="mailto:rjavlon2004@gmail.com">Email me <ArrowUpRight /></a>
+              <a
+                className="button button-light"
+                href="https://mail.google.com/mail/?view=cm&fs=1&to=rjavlon2004%40gmail.com&su=Portfolio%20inquiry&body=Hi%20Javlonbek%2C%0A%0AI%20found%20your%20portfolio%20and%20would%20like%20to%20connect.%0A"
+                target="_blank"
+                rel="noreferrer"
+              >Email me <ArrowUpRight /></a>
               <button className="copy-button" type="button" onClick={copyEmail}>{copied ? "Copied!" : "Copy email"}</button>
             </div>
           </div>
