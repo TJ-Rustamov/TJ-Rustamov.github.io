@@ -119,6 +119,63 @@ const projects = [
   },
 ];
 
+const independentProjects = [
+  {
+    number: "05",
+    domain: "Local AI · Meeting intelligence",
+    title: "Meeting Whisperer",
+    summary: "A local-first meeting recorder that turns microphone and system audio into speaker-aware transcripts, searchable history, and structured follow-up.",
+    impact: [
+      "Streams microphone and desktop audio over realtime WebSockets",
+      "Runs faster-whisper, VAD, and optional diarization locally",
+      "Persists recordings, transcripts, and meeting outcomes",
+      "Packages the complete experience with Docker and a desktop launcher",
+    ],
+    stack: ["FastAPI", "React", "WebSockets", "Whisper", "pyannote", "SQLite"],
+    tone: "purple",
+    link: "./projects/meeting-whisperer/",
+    linkLabel: "Try walkthrough",
+    internal: true,
+  },
+  {
+    number: "06",
+    domain: "Education · Assessment technology",
+    title: "IELTS Mock Examiner",
+    summary: "An integrated IELTS practice platform combining realtime speaking sessions, examiner prompts, writing evaluation, progress tracking, and admin workflows.",
+    impact: [
+      "Built speaking flows with Django Channels, Whisper, and Kokoro TTS",
+      "Connected Gemini-backed criterion feedback for writing practice",
+      "Created learner dashboards, authentication, and question management",
+      "Delivered a containerized full-stack academic product",
+    ],
+    stack: ["Django", "React", "Channels", "Gemini", "Whisper", "Kokoro"],
+    tone: "green",
+    link: "./projects/ielts-examiner/",
+    linkLabel: "Try walkthrough",
+    internal: true,
+  },
+];
+
+const academicProjects = [
+  {
+    number: "07",
+    domain: "Academic work · BSc capstone",
+    title: "Graduation Capstone",
+    summary: "The research, methodology, architecture, and team story behind IELTS Mock Examiner, presented as a focused academic case study.",
+    impact: [
+      "Framed an access problem around repeated IELTS practice and feedback",
+      "Documented an integrated realtime speech and writing architecture",
+      "Translated engineering output into an academic poster and presentation",
+      "Completed at Central Asian University Engineering School",
+    ],
+    stack: ["Applied AI", "Research", "System Design", "Technical Communication"],
+    tone: "orange",
+    link: "./projects/graduation-capstone/",
+    linkLabel: "View capstone",
+    internal: true,
+  },
+];
+
 const projectGroups = [
   {
     label: "Official work experience",
@@ -129,6 +186,16 @@ const projectGroups = [
     label: "Other selected projects",
     description: "Additional products and platform work across education and recruitment.",
     projects: projects.slice(2),
+  },
+  {
+    label: "Independent AI products",
+    description: "Self-directed full-stack systems exploring local speech intelligence and accessible language assessment.",
+    projects: independentProjects,
+  },
+  {
+    label: "Academic work",
+    description: "Graduation research and technical communication behind a complete applied AI capstone.",
+    projects: academicProjects,
   },
 ];
 
@@ -283,7 +350,7 @@ function App() {
                       </div>
                       <div className="project-side">
                         <div className="project-glyph" aria-hidden="true"><span>{project.number}</span></div>
-                        {project.link && <a href={project.link} target="_blank" rel="noreferrer">{project.linkLabel} <ArrowUpRight size={17} /></a>}
+                        {project.link && <a href={project.link} target={project.internal ? undefined : "_blank"} rel={project.internal ? undefined : "noreferrer"}>{project.linkLabel} <ArrowUpRight size={17} /></a>}
                       </div>
                     </article>
                   ))}
