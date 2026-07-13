@@ -87,6 +87,18 @@ export const caseStudies = {
       srcSet: "graduation/memories/ceremony-finale-1000.webp 1000w, graduation/memories/ceremony-finale-2000.webp 2000w",
       alt: "Central Asian University graduates celebrating together on the 2026 graduation stage",
     },
+    reflectionPhotos: [
+      {
+        src: "graduation/memories/reflection-classroom.webp",
+        alt: "Computer Science classmates sharing an informal moment together in a university lecture room",
+        position: "center 55%",
+      },
+      {
+        src: "graduation/memories/reflection-campus.webp",
+        alt: "University friends sitting together on wooden steps during an ordinary day on campus",
+        position: "center 58%",
+      },
+    ],
     beforeGraduation: [
       {
         src: "graduation/memories/before-cau-1280.webp",
