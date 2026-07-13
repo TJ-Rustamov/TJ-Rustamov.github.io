@@ -123,6 +123,10 @@ main, footer { position: relative; z-index: 2; }
 .section-heading h2, .about h2, .contact h2 { margin: 14px 0 0; font-size: clamp(40px,5vw,72px); line-height: 1.02; letter-spacing: -.055em; }
 .section-heading p { margin: 0 0 5px; color: var(--muted); font-size: 17px; line-height: 1.55; }
 .kicker { color: var(--lime); }
+.project-group + .project-group { margin-top: 84px; }
+.project-group-heading { display: grid; grid-template-columns: 1fr minmax(260px, .7fr); gap: 8vw; align-items: end; margin-bottom: 22px; }
+.project-group-heading h3 { margin: 0; font-size: clamp(25px, 2.6vw, 39px); letter-spacing: -.04em; }
+.project-group-heading p { max-width: 520px; margin: 0; color: var(--muted); font-size: 14px; line-height: 1.55; }
 .project-list { border-top: 1px solid var(--violet-line); }
 .project-card { display: grid; grid-template-columns: 60px minmax(0,1fr) 280px; gap: 36px; margin: 24px 0; padding: 40px; border: 1px solid var(--violet-line); border-radius: 28px; background: rgba(13,7,29,.78); box-shadow: 0 20px 70px rgba(0,0,0,.2); backdrop-filter: blur(15px); }
 .project-card:hover { border-color: color-mix(in srgb, var(--accent) 55%, transparent); box-shadow: 0 25px 80px rgba(0,0,0,.3), inset 0 0 50px rgba(124,58,237,.05); }
@@ -309,6 +313,8 @@ html[data-theme="light"] .social-links a:hover { color: #fffaf3; }
   .hero-proof { grid-template-columns: 1fr 1fr; gap: 22px 0; padding: 22px 18px; }
   .hero-proof div:nth-child(3) { padding-left: 0; border-left: 0; }
   .section-heading, .about-grid { grid-template-columns: 1fr; gap: 25px; }
+  .project-group-heading { grid-template-columns: 1fr; gap: 10px; }
+  .project-group + .project-group { margin-top: 62px; }
   .section-heading { margin-bottom: 40px; }
   .project-card { grid-template-columns: 1fr; gap: 16px; margin: 16px 0; padding: 28px 22px; }
   .project-index, .project-side { grid-column: 1; }

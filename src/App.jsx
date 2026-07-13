@@ -119,6 +119,19 @@ const projects = [
   },
 ];
 
+const projectGroups = [
+  {
+    label: "Official work experience",
+    description: "Production systems delivered as part of my formal roles at NavAI and SinoAI.",
+    projects: projects.slice(0, 2),
+  },
+  {
+    label: "Other selected projects",
+    description: "Additional products and platform work across education and recruitment.",
+    projects: projects.slice(2),
+  },
+];
+
 const experience = [
   ["2026 — now", "SinoAI", "Fullstack Developer & AI/ML Engineer"],
   ["2025 — 2026", "NavAI", "Fullstack Developer & AI Engineer"],
@@ -248,24 +261,34 @@ function App() {
             <div><span className="kicker">Selected work</span><h2>Systems built around people, not demos.</h2></div>
             <p>Each project began with a practical constraint and ended as something people could actually use.</p>
           </div>
-          <div className="project-list">
-            {projects.map((project, index) => (
-              <article className={`project-card tone-${project.tone}`} key={project.number} data-motion={index % 2 === 0 ? "left" : "right"}>
-                <div className="project-index">{project.number}</div>
-                <div className="project-main">
-                  <span className="project-domain">{project.domain}</span>
-                  <h3>{project.title}</h3>
-                  <p className="project-summary">{project.summary}</p>
-                  <ul>
-                    {project.impact.map((point) => <li key={point}>{point}</li>)}
-                  </ul>
-                  <div className="tag-row">{project.stack.map((tag) => <span key={tag}>{tag}</span>)}</div>
+          <div className="project-groups">
+            {projectGroups.map((group, groupIndex) => (
+              <section className="project-group" key={group.label} aria-labelledby={`project-group-${groupIndex}`}>
+                <div className="project-group-heading" data-motion={groupIndex % 2 === 0 ? "left" : "right"}>
+                  <h3 id={`project-group-${groupIndex}`}>{group.label}</h3>
+                  <p>{group.description}</p>
                 </div>
-                <div className="project-side">
-                  <div className="project-glyph" aria-hidden="true"><span>{project.number}</span></div>
-                  {project.link && <a href={project.link} target="_blank" rel="noreferrer">{project.linkLabel} <ArrowUpRight size={17} /></a>}
+                <div className="project-list">
+                  {group.projects.map((project, index) => (
+                    <article className={`project-card tone-${project.tone}`} key={project.number} data-motion={(index + groupIndex) % 2 === 0 ? "left" : "right"}>
+                      <div className="project-index">{project.number}</div>
+                      <div className="project-main">
+                        <span className="project-domain">{project.domain}</span>
+                        <h3>{project.title}</h3>
+                        <p className="project-summary">{project.summary}</p>
+                        <ul>
+                          {project.impact.map((point) => <li key={point}>{point}</li>)}
+                        </ul>
+                        <div className="tag-row">{project.stack.map((tag) => <span key={tag}>{tag}</span>)}</div>
+                      </div>
+                      <div className="project-side">
+                        <div className="project-glyph" aria-hidden="true"><span>{project.number}</span></div>
+                        {project.link && <a href={project.link} target="_blank" rel="noreferrer">{project.linkLabel} <ArrowUpRight size={17} /></a>}
+                      </div>
+                    </article>
+                  ))}
                 </div>
-              </article>
+              </section>
             ))}
           </div>
         </section>
