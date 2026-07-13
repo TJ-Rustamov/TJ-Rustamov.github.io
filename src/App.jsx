@@ -52,7 +52,7 @@ const ThemeIcon = ({ theme }) => (
 
 const projects = [
   {
-    number: "01",
+    number: "02",
     domain: "Civic technology · Government services",
     title: "Youth Affairs Voice Assistant",
     summary:
@@ -69,7 +69,7 @@ const projects = [
     linkLabel: "NavAI",
   },
   {
-    number: "02",
+    number: "01",
     domain: "Public health · Healthcare access",
     title: "SinoAI Health Platform",
     summary:
@@ -87,15 +87,15 @@ const projects = [
   },
   {
     number: "03",
-    domain: "Education · Language learning",
-    title: "AI Speaking Assessment",
+    domain: "Education · English practice",
+    title: "English Speaking Practice",
     summary:
-      "An AI-powered learning experience that turns spoken English into clear feedback for learners working to improve communication skills.",
+      "A guided English practice experience that turns spoken responses into clear, practical feedback for learners improving everyday communication.",
     impact: [
-      "Integrated Whisper and GPT-4o for transcription and feedback",
-      "Implemented voice activity detection for precise speech segmentation",
-      "Connected Django and React into a unified product experience",
-      "Helped deliver two AI learning platforms to production in one month",
+      "Built guided speaking exercises with transcription and focused feedback",
+      "Used voice activity detection for natural speech segmentation",
+      "Connected Django and React into one learner-friendly experience",
+      "Helped deliver two English-learning platforms to production in one month",
     ],
     stack: ["Django", "React", "Whisper", "GPT-4o", "VAD"],
     tone: "blue",
@@ -121,7 +121,7 @@ const projects = [
 
 const independentProjects = [
   {
-    number: "05",
+    number: "06",
     domain: "Local AI · Meeting intelligence",
     title: "Meeting Whisperer",
     summary: "A local-first meeting recorder that turns microphone and system audio into speaker-aware transcripts, searchable history, and structured follow-up.",
@@ -138,7 +138,7 @@ const independentProjects = [
     internal: true,
   },
   {
-    number: "06",
+    number: "05",
     domain: "Education · Assessment technology",
     title: "IELTS Mock Examiner",
     summary: "An integrated IELTS practice platform combining realtime speaking sessions, examiner prompts, writing evaluation, progress tracking, and admin workflows.",
@@ -180,7 +180,7 @@ const projectGroups = [
   {
     label: "Official work experience",
     description: "Production systems delivered as part of my formal roles at NavAI and SinoAI.",
-    projects: projects.slice(0, 2),
+    projects: [projects[1], projects[0]],
   },
   {
     label: "Other selected projects",
@@ -190,7 +190,7 @@ const projectGroups = [
   {
     label: "Independent AI products",
     description: "Self-directed full-stack systems exploring local speech intelligence and accessible language assessment.",
-    projects: independentProjects,
+    projects: [independentProjects[1], independentProjects[0]],
   },
   {
     label: "Academic work",
@@ -216,7 +216,7 @@ const principles = [
 const portfolioAsset = (path) => `./case-studies/${path}`;
 
 function FeaturedProjectCard({ project, motion }) {
-  if (project.number === "05") {
+  if (project.number === "06") {
     return (
       <article className="featured-project featured-meeting" data-motion={motion}>
         <div className="featured-meeting-screen">
@@ -225,7 +225,7 @@ function FeaturedProjectCard({ project, motion }) {
         </div>
         <div className="featured-project-copy">
           <span className="featured-badge">Local-first voice intelligence</span>
-          <p className="featured-number">05 / Independent AI product</p>
+          <p className="featured-number">06 / Independent AI product</p>
           <h3>{project.title}</h3>
           <p>{project.summary}</p>
           <div className="featured-boundary"><strong>Local</strong><span>STT · VAD · diarization · media</span></div>
@@ -236,12 +236,12 @@ function FeaturedProjectCard({ project, motion }) {
     );
   }
 
-  if (project.number === "06") {
+  if (project.number === "05") {
     return (
       <article className="featured-project featured-ielts" data-motion={motion}>
         <div className="featured-project-copy">
           <span className="featured-badge">Assessment workspace</span>
-          <p className="featured-number">06 / Independent AI product</p>
+          <p className="featured-number">05 / Independent AI product</p>
           <h3>{project.title}</h3>
           <p>{project.summary}</p>
           <ol className="ielts-mini-flow"><li><span>01</span>Speaking</li><li><span>02</span>Writing</li><li><span>03</span>Feedback</li></ol>
@@ -365,7 +365,7 @@ function App() {
               <p>From a citizen’s question to a system that can respond, act, and hand off safely.</p>
             </div>
             <div className="signal-card signal-small signal-top"><span className="voice-label">Voice AI</span><VoiceWaveform /></div>
-            <div className="signal-card signal-small signal-bottom">4 languages <span>●</span></div>
+            <div className="signal-card signal-small signal-bottom">3 languages <span>●</span></div>
             <div className="hero-monogram">RJ</div>
           </div>
           <div className="hero-proof" data-motion="up">

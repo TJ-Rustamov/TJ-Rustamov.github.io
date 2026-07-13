@@ -314,13 +314,14 @@ html[data-theme="light"] .graduation-home-card > span, html[data-theme="light"] 
 .featured-meeting .featured-badge, .featured-meeting .featured-number { color: #ff4aa2; }
 .featured-meeting .featured-boundary strong { color: #090512; background: #ff4aa2; }
 .featured-meeting .tag-row span { border-color: rgba(255,74,162,.22); background: rgba(255,74,162,.08); }
-.featured-meeting .featured-project-copy > a { color: #ff4aa2; }
+.featured-meeting .featured-project-copy > a { padding: 14px 18px; border-radius: 100px; color: #090512; background: #ff4aa2; box-shadow: 0 14px 34px rgba(255,74,162,.24); }
+.featured-meeting .featured-project-copy > a:hover { transform: translateY(-2px); box-shadow: 0 18px 42px rgba(255,74,162,.34); }
 
 .featured-ielts { display: grid; grid-template-columns: minmax(360px,.78fr) minmax(0,1.22fr); align-items: stretch; border-color: rgba(77,227,193,.32); background: radial-gradient(circle at 88% 12%,rgba(77,227,193,.18),transparent 34%),linear-gradient(145deg,#061c19,#071116); }
 .featured-ielts .featured-badge, .featured-ielts .featured-number { color: #4de3c1; }
 .featured-ielts .featured-boundary strong { color: #061512; background: #4de3c1; }
 .featured-ielts .featured-boundary em { color: #ffb19d; border: 1px solid rgba(255,122,89,.35); background: rgba(255,122,89,.08); }
-.featured-ielts .featured-project-copy > a { color: #4de3c1; }
+.featured-ielts .featured-project-copy > a { padding: 14px 18px; border-radius: 100px; color: #061512; background: #4de3c1; box-shadow: 0 14px 34px rgba(77,227,193,.2); }
 .ielts-mini-flow { margin: 30px 0; padding: 0; display: grid; grid-template-columns: repeat(3,1fr); list-style: none; border-block: 1px solid rgba(77,227,193,.16); }
 .ielts-mini-flow li { padding: 16px 5px; display: flex; flex-direction: column; gap: 6px; color: #e5fff8; font-size: 12px; font-weight: 800; }
 .ielts-mini-flow span { color: #4de3c1; font-size: 9px; }
@@ -344,7 +345,7 @@ html[data-theme="light"] .featured-meeting { background: radial-gradient(circle 
 html[data-theme="light"] .featured-ielts { background: radial-gradient(circle at 88% 12%,rgba(24,123,103,.13),transparent 34%),linear-gradient(145deg,#f7fcf9,#e8f0eb); }
 html[data-theme="light"] .featured-project h3 { color: #17211d; }
 html[data-theme="light"] .featured-project-copy > p:not(.featured-number) { color: #59635e; }
-html[data-theme="light"] .featured-project-copy > a { color: var(--accent); }
+html[data-theme="light"] .featured-meeting .featured-project-copy > a, html[data-theme="light"] .featured-ielts .featured-project-copy > a { color: #fff; }
 html[data-theme="light"] .featured-meeting .featured-boundary strong { color: #fff; background: #d92f7b; }
 html[data-theme="light"] .featured-ielts .featured-boundary strong { color: #fff; background: #187b67; }
 html[data-theme="light"] .ielts-mini-flow { border-color: rgba(24,123,103,.17); }
