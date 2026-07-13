@@ -213,6 +213,66 @@ const principles = [
   ["04", "Measure and improve", "Track outcomes, catch failure modes, and treat production behavior as the source of truth."],
 ];
 
+const portfolioAsset = (path) => `./case-studies/${path}`;
+
+function FeaturedProjectCard({ project, motion }) {
+  if (project.number === "05") {
+    return (
+      <article className="featured-project featured-meeting" data-motion={motion}>
+        <div className="featured-meeting-screen">
+          <img src={portfolioAsset("meeting/meeting-detail.webp")} alt="Meeting Whisperer meeting detail with recording and speaker-labelled transcript" loading="lazy" />
+          <div className="meeting-screen-line" aria-hidden="true"><i /><span>Local capture · diarized transcript</span></div>
+        </div>
+        <div className="featured-project-copy">
+          <span className="featured-badge">Local-first voice intelligence</span>
+          <p className="featured-number">05 / Independent AI product</p>
+          <h3>{project.title}</h3>
+          <p>{project.summary}</p>
+          <div className="featured-boundary"><strong>Local</strong><span>STT · VAD · diarization · media</span></div>
+          <div className="tag-row">{project.stack.slice(0, 5).map((tag) => <span key={tag}>{tag}</span>)}</div>
+          <a href={project.link}>{project.linkLabel} <ArrowUpRight size={17} /></a>
+        </div>
+      </article>
+    );
+  }
+
+  if (project.number === "06") {
+    return (
+      <article className="featured-project featured-ielts" data-motion={motion}>
+        <div className="featured-project-copy">
+          <span className="featured-badge">Assessment workspace</span>
+          <p className="featured-number">06 / Independent AI product</p>
+          <h3>{project.title}</h3>
+          <p>{project.summary}</p>
+          <ol className="ielts-mini-flow"><li><span>01</span>Speaking</li><li><span>02</span>Writing</li><li><span>03</span>Feedback</li></ol>
+          <div className="featured-boundary"><strong>Local speech</strong><span>faster-whisper + Kokoro</span><em>External LLM · Gemini</em></div>
+          <a href={project.link}>{project.linkLabel} <ArrowUpRight size={17} /></a>
+        </div>
+        <div className="featured-ielts-screens" aria-label="IELTS Mock Examiner dashboard and evaluation screens">
+          <img className="ielts-screen-back" src={portfolioAsset("ielts/dashboard.webp")} alt="IELTS Mock Examiner learner dashboard" loading="lazy" />
+          <img className="ielts-screen-front" src={portfolioAsset("ielts/speaking-evaluation.webp")} alt="IELTS Mock Examiner speaking evaluation" loading="lazy" />
+        </div>
+      </article>
+    );
+  }
+
+  return (
+    <article className="featured-project featured-graduation" data-motion={motion}>
+      <picture>
+        <source media="(max-width: 760px)" srcSet={portfolioAsset("graduation/memories/ceremony-diploma-1000.webp")} />
+        <img src={portfolioAsset("graduation/memories/ceremony-diploma-2000.webp")} alt="A Central Asian University Computer Science graduate receiving a diploma on stage" loading="lazy" />
+      </picture>
+      <div className="graduation-card-shade" />
+      <div className="graduation-card-top"><span>Central Asian University</span><strong>Class of 2026</strong></div>
+      <div className="graduation-card-copy">
+        <p>“The degree records what I studied. The people remind me how I grew.”</p>
+        <h3>{project.title}</h3>
+        <a href={project.link}>Read the graduation story <ArrowUpRight size={17} /></a>
+      </div>
+    </article>
+  );
+}
+
 function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -337,7 +397,9 @@ function App() {
                   <p>{group.description}</p>
                 </div>
                 <div className="project-list">
-                  {group.projects.map((project, index) => (
+                  {group.projects.map((project, index) => ["05", "06", "07"].includes(project.number) ? (
+                    <FeaturedProjectCard project={project} key={project.number} motion={(index + groupIndex) % 2 === 0 ? "left" : "right"} />
+                  ) : (
                     <article className={`project-card tone-${project.tone}`} key={project.number} data-motion={(index + groupIndex) % 2 === 0 ? "left" : "right"}>
                       <div className="project-index">{project.number}</div>
                       <div className="project-main">
@@ -413,10 +475,9 @@ function App() {
             </div>
           </div>
           <div className="graduation-home-card" data-motion="right">
-            <span>2022—2026</span>
-            <strong>BSc<br />Computer Science</strong>
-            <p>Central Asian University<br />Engineering School</p>
-            <a href="https://centralasian.uz/" target="_blank" rel="noreferrer">Visit university <ArrowUpRight size={16} /></a>
+            <img src={portfolioAsset("graduation/memories/ceremony-finale-1000.webp")} alt="Central Asian University graduates celebrating together at the 2026 ceremony" loading="lazy" />
+            <div className="graduation-home-card-shade" />
+            <div><span>2022—2026</span><strong>BSc<br />Computer Science</strong><p>Central Asian University<br />Engineering School</p><a href="https://centralasian.uz/" target="_blank" rel="noreferrer">Visit university <ArrowUpRight size={16} /></a></div>
           </div>
         </section>
 

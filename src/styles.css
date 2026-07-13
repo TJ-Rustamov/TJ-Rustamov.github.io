@@ -294,6 +294,75 @@ html[data-theme="light"] .graduation-home-card { border-color: rgba(238,105,75,.
 html[data-theme="light"] .graduation-home-card::before { color: rgba(23,33,29,.055); }
 html[data-theme="light"] .graduation-home-card > span, html[data-theme="light"] .graduation-home-card a { color: #d6533a; }
 
+.featured-project { position: relative; min-height: 580px; margin: 24px 0; overflow: hidden; border: 1px solid var(--violet-line); border-radius: 34px; box-shadow: 0 28px 85px rgba(0,0,0,.24); }
+.featured-project-copy { position: relative; z-index: 2; padding: clamp(34px,5vw,70px); }
+.featured-badge { width: fit-content; padding: 8px 11px; border: 1px solid currentColor; border-radius: 100px; text-transform: uppercase; letter-spacing: .12em; font-size: 9px; font-weight: 850; }
+.featured-number { margin: 32px 0 10px !important; text-transform: uppercase; letter-spacing: .11em; font-size: 10px !important; font-weight: 800; }
+.featured-project h3 { margin: 0; font-size: clamp(45px,5vw,76px); line-height: .94; letter-spacing: -.06em; }
+.featured-project-copy > p:not(.featured-number) { max-width: 620px; color: var(--muted); font-size: 16px; line-height: 1.7; }
+.featured-project-copy > a, .graduation-card-copy a { width: fit-content; margin-top: 28px; display: inline-flex; align-items: center; gap: 8px; color: var(--text); text-decoration: none; font-size: 13px; font-weight: 850; }
+.featured-boundary { margin: 26px 0 18px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 11px; }
+.featured-boundary strong, .featured-boundary em { padding: 7px 10px; border-radius: 100px; font-style: normal; }
+.featured-boundary span { color: var(--muted); }
+
+.featured-meeting { display: grid; grid-template-columns: minmax(0,1.42fr) minmax(340px,.68fr); align-items: center; border-color: rgba(255,74,162,.34); background: radial-gradient(circle at 8% 15%,rgba(255,74,162,.19),transparent 32%),linear-gradient(145deg,#25091f,#090512 70%); }
+.featured-meeting-screen { position: relative; margin: clamp(18px,3vw,44px) 0 clamp(18px,3vw,44px) clamp(18px,3vw,44px); overflow: hidden; border: 1px solid rgba(255,74,162,.34); border-radius: 22px; background: #fff; box-shadow: 0 25px 65px rgba(0,0,0,.34); }
+.featured-meeting-screen img { width: 100%; display: block; }
+.meeting-screen-line { padding: 14px 18px; display: flex; align-items: center; gap: 10px; color: #f6d9ea; background: #160817; font-size: 10px; font-weight: 750; }
+.meeting-screen-line i { position: relative; width: 34%; height: 3px; overflow: hidden; border-radius: 5px; background: rgba(255,74,162,.22); }
+.meeting-screen-line i::after { content: ""; position: absolute; inset: 0 36% 0 0; border-radius: inherit; background: #ff4aa2; }
+.featured-meeting .featured-badge, .featured-meeting .featured-number { color: #ff4aa2; }
+.featured-meeting .featured-boundary strong { color: #090512; background: #ff4aa2; }
+.featured-meeting .tag-row span { border-color: rgba(255,74,162,.22); background: rgba(255,74,162,.08); }
+.featured-meeting .featured-project-copy > a { color: #ff4aa2; }
+
+.featured-ielts { display: grid; grid-template-columns: minmax(360px,.78fr) minmax(0,1.22fr); align-items: stretch; border-color: rgba(77,227,193,.32); background: radial-gradient(circle at 88% 12%,rgba(77,227,193,.18),transparent 34%),linear-gradient(145deg,#061c19,#071116); }
+.featured-ielts .featured-badge, .featured-ielts .featured-number { color: #4de3c1; }
+.featured-ielts .featured-boundary strong { color: #061512; background: #4de3c1; }
+.featured-ielts .featured-boundary em { color: #ffb19d; border: 1px solid rgba(255,122,89,.35); background: rgba(255,122,89,.08); }
+.featured-ielts .featured-project-copy > a { color: #4de3c1; }
+.ielts-mini-flow { margin: 30px 0; padding: 0; display: grid; grid-template-columns: repeat(3,1fr); list-style: none; border-block: 1px solid rgba(77,227,193,.16); }
+.ielts-mini-flow li { padding: 16px 5px; display: flex; flex-direction: column; gap: 6px; color: #e5fff8; font-size: 12px; font-weight: 800; }
+.ielts-mini-flow span { color: #4de3c1; font-size: 9px; }
+.featured-ielts-screens { position: relative; min-height: 600px; overflow: hidden; }
+.featured-ielts-screens img { position: absolute; width: 81%; border: 1px solid rgba(77,227,193,.28); border-radius: 18px; background: #fff; box-shadow: 0 28px 65px rgba(0,0,0,.3); }
+.ielts-screen-back { top: 10%; right: -4%; transform: rotate(2deg); }
+.ielts-screen-front { left: 2%; bottom: 8%; transform: rotate(-2.5deg); }
+
+.featured-graduation { min-height: 720px; display: flex; flex-direction: column; justify-content: space-between; padding: clamp(28px,4.5vw,68px); border-color: rgba(244,200,75,.46); background: #071634; }
+.featured-graduation picture, .featured-graduation picture img, .graduation-card-shade { position: absolute; inset: 0; width: 100%; height: 100%; }
+.featured-graduation picture img { object-fit: cover; object-position: center 35%; }
+.graduation-card-shade { background: linear-gradient(90deg,rgba(3,13,34,.94),rgba(3,13,34,.42) 55%,rgba(3,13,34,.16)),linear-gradient(0deg,rgba(3,13,34,.9),transparent 55%); }
+.graduation-card-top, .graduation-card-copy { position: relative; z-index: 2; }
+.graduation-card-top { display: flex; justify-content: space-between; gap: 20px; color: #f4c84b; text-transform: uppercase; letter-spacing: .14em; font-size: 10px; font-weight: 850; }
+.graduation-card-copy { max-width: 720px; margin-top: auto; }
+.graduation-card-copy > p { margin: 0 0 25px; color: #f4c84b; font-family: Georgia,"Times New Roman",serif; font-size: clamp(30px,4vw,58px); font-style: italic; line-height: 1.13; }
+.graduation-card-copy h3 { color: #fff; font-size: clamp(40px,5vw,70px); }
+.graduation-card-copy a { color: #f4c84b; }
+
+html[data-theme="light"] .featured-meeting { background: radial-gradient(circle at 8% 15%,rgba(217,47,123,.13),transparent 32%),linear-gradient(145deg,#fff9fb,#f0e8ec); }
+html[data-theme="light"] .featured-ielts { background: radial-gradient(circle at 88% 12%,rgba(24,123,103,.13),transparent 34%),linear-gradient(145deg,#f7fcf9,#e8f0eb); }
+html[data-theme="light"] .featured-project h3 { color: #17211d; }
+html[data-theme="light"] .featured-project-copy > p:not(.featured-number) { color: #59635e; }
+html[data-theme="light"] .featured-project-copy > a { color: var(--accent); }
+html[data-theme="light"] .featured-meeting .featured-boundary strong { color: #fff; background: #d92f7b; }
+html[data-theme="light"] .featured-ielts .featured-boundary strong { color: #fff; background: #187b67; }
+html[data-theme="light"] .ielts-mini-flow { border-color: rgba(24,123,103,.17); }
+html[data-theme="light"] .ielts-mini-flow li { color: #17211d; }
+html[data-theme="light"] .ielts-mini-flow span { color: #187b67; }
+html[data-theme="light"] .featured-graduation h3 { color: #fff; }
+
+.graduation-home-card { padding: 0; display: block; background: #071634; }
+.graduation-home-card::before { display: none; }
+.graduation-home-card > img, .graduation-home-card-shade { position: absolute; inset: 0; width: 100%; height: 100%; }
+.graduation-home-card > img { object-fit: cover; }
+.graduation-home-card-shade { background: linear-gradient(0deg,rgba(3,13,34,.95),rgba(3,13,34,.16) 74%); }
+.graduation-home-card > div:last-child { position: absolute; z-index: 2; inset: auto 0 0; padding: clamp(30px,4vw,55px); }
+.graduation-home-card > div:last-child > span { color: #f4c84b; font-size: 11px; font-weight: 850; letter-spacing: .14em; }
+.graduation-home-card > div:last-child strong { display: block; margin-top: 15px; color: #fff; font-size: clamp(42px,5vw,68px); line-height: .9; letter-spacing: -.06em; }
+.graduation-home-card > div:last-child p { color: #d5dded; line-height: 1.6; }
+.graduation-home-card > div:last-child a { display: inline-flex; align-items: center; gap: 7px; color: #f4c84b; font-size: 12px; font-weight: 800; text-decoration: none; }
+
 @media (max-width: 1050px) {
   .hero { grid-template-columns: 1fr; }
   .hero-visual { width: min(100%,580px); justify-self: center; }
@@ -306,6 +375,9 @@ html[data-theme="light"] .graduation-home-card > span, html[data-theme="light"] 
   .contact h2 { max-width: 970px; }
   .graduation-home { grid-template-columns: 1fr; }
   .graduation-home-card { min-height: 360px; }
+  .featured-meeting, .featured-ielts { grid-template-columns: 1fr; }
+  .featured-meeting-screen { margin: 28px 28px 0; }
+  .featured-ielts-screens { min-height: 560px; }
 }
 
 @media (max-width: 760px) {
@@ -342,6 +414,18 @@ html[data-theme="light"] .graduation-home-card > span, html[data-theme="light"] 
   .experience-row { grid-template-columns: 1fr; gap: 7px; }
   .skills-block { grid-template-columns: 1fr; padding: 24px 20px; }
   .graduation-home-card { min-height: 330px; border-radius: 28px; }
+  .featured-project { min-height: 0; border-radius: 25px; }
+  .featured-project-copy { padding: 30px 22px; }
+  .featured-project h3 { font-size: clamp(42px,13vw,60px); }
+  .featured-meeting-screen { margin: 12px 12px 0; border-radius: 15px; }
+  .featured-ielts-screens { min-height: 380px; }
+  .featured-ielts-screens img { width: 92%; border-radius: 12px; }
+  .ielts-mini-flow { grid-template-columns: 1fr; }
+  .ielts-mini-flow li + li { border-top: 1px solid rgba(77,227,193,.14); }
+  .featured-graduation { min-height: 650px; padding: 24px 20px; }
+  .featured-graduation picture img { object-position: 54% center; }
+  .graduation-card-top { flex-direction: column; }
+  .graduation-card-copy > p { font-size: 32px; }
   .contact-actions { align-items: stretch; flex-direction: column; }
   .copy-button { min-height: 50px; }
   footer { grid-template-columns: 1fr auto; }
