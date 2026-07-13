@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import AmbientNetwork from "./AmbientNetwork.jsx";
 
 const ArrowUpRight = ({ size = 18 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -17,6 +18,24 @@ const Linkedin = () => (
     <path d="M5.34 7.53H1.7V22h3.64V7.53ZM3.52 1.8a2.12 2.12 0 1 0 0 4.24 2.12 2.12 0 0 0 0-4.24ZM22.3 13.7c0-4.36-2.33-6.39-5.44-6.39-2.5 0-3.63 1.38-4.25 2.35V7.53H8.97V22h3.64v-7.16c0-1.89.36-3.72 2.7-3.72 2.31 0 2.34 2.16 2.34 3.84V22h3.64l.01-8.3Z" />
   </svg>
 );
+
+const Gitlab = () => (
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <path d="m12 22.25 4.42-13.6H7.58L12 22.25Zm0 0L7.58 8.65H1.4L12 22.25ZM1.4 8.65.05 12.78c-.12.38.01.8.33 1.03L12 22.25 1.4 8.65Zm0 0h6.18L4.93.5c-.14-.42-.73-.42-.87 0L1.4 8.65Zm10.6 13.6 4.42-13.6h6.18L12 22.25Zm10.6-13.6 1.35 4.13c.12.38-.01.8-.33 1.03L12 22.25 22.6 8.65Zm0 0h-6.18L19.07.5c.14-.42.73-.42.87 0l2.66 8.15Z" />
+  </svg>
+);
+
+const VoiceWaveform = () => {
+  const bars = [8, 15, 24, 34, 46, 28, 18, 38, 52, 33, 21, 42, 56, 35, 24, 16, 9];
+  return (
+    <span className="voice-wave" aria-hidden="true">
+      <span className="voice-pulse" />
+      {bars.map((height, index) => (
+        <i key={`${height}-${index}`} style={{ "--wave-height": `${height}%`, "--wave-delay": `${index * -0.075}s` }} />
+      ))}
+    </span>
+  );
+};
 
 const projects = [
   {
@@ -107,11 +126,18 @@ function App() {
 
   useEffect(() => {
     const observer = new IntersectionObserver(
-      (entries) => entries.forEach((entry) => entry.isIntersecting && entry.target.classList.add("is-visible")),
-      { threshold: 0.12 },
+      (entries) => entries.forEach((entry) => entry.target.classList.toggle("is-visible", entry.isIntersecting)),
+      { threshold: 0.1, rootMargin: "-6% 0px -6% 0px" },
     );
-    document.querySelectorAll("[data-reveal]").forEach((element) => observer.observe(element));
+    document.querySelectorAll("[data-motion]").forEach((element) => observer.observe(element));
     return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!window.location.hash) return;
+    const target = document.querySelector(window.location.hash);
+    if (!target) return;
+    requestAnimationFrame(() => target.scrollIntoView({ block: "start" }));
   }, []);
 
   const copyEmail = async () => {
@@ -122,9 +148,10 @@ function App() {
 
   return (
     <div className="site-shell">
+      <AmbientNetwork />
       <header className="nav-wrap">
         <a className="brand" href="#top" aria-label="Javlonbek Rustamov, home">
-          <span className="brand-mark">JR</span>
+          <span className="brand-mark">RJ</span>
           <span>Javlonbek Rustamov</span>
         </a>
         <button
@@ -147,7 +174,7 @@ function App() {
 
       <main id="top">
         <section className="hero section-pad">
-          <div className="hero-copy" data-reveal>
+          <div className="hero-copy" data-motion="left">
             <div className="eyebrow"><span className="status-dot" /> Tashkent, Uzbekistan · Building for real-world impact</div>
             <h1>I build AI systems that make complex services <em>clear and usable.</em></h1>
             <p className="hero-lede">
@@ -158,7 +185,7 @@ function App() {
               <a className="text-link" href="https://github.com/TJ-Rustamov" target="_blank" rel="noreferrer">View GitHub <ArrowUpRight size={16} /></a>
             </div>
           </div>
-          <div className="hero-visual" data-reveal>
+          <div className="hero-visual" data-motion="right">
             <div className="orbit orbit-one" />
             <div className="orbit orbit-two" />
             <div className="signal-card signal-main">
@@ -166,11 +193,11 @@ function App() {
               <strong>AI for public impact</strong>
               <p>From a citizen’s question to a system that can respond, act, and hand off safely.</p>
             </div>
-            <div className="signal-card signal-small signal-top">Voice AI <span>↗</span></div>
+            <div className="signal-card signal-small signal-top"><span className="voice-label">Voice AI</span><VoiceWaveform /></div>
             <div className="signal-card signal-small signal-bottom">4 languages <span>●</span></div>
-            <div className="hero-monogram">JR</div>
+            <div className="hero-monogram">RJ</div>
           </div>
-          <div className="hero-proof" data-reveal>
+          <div className="hero-proof" data-motion="up">
             <div><strong>Production</strong><span>Voice & LLM systems</span></div>
             <div><strong>4 domains</strong><span>Government to health</span></div>
             <div><strong>End-to-end</strong><span>Scope, build, deploy</span></div>
@@ -187,13 +214,13 @@ function App() {
         </section>
 
         <section className="work section-pad" id="work">
-          <div className="section-heading" data-reveal>
+          <div className="section-heading" data-motion="left">
             <div><span className="kicker">Selected work</span><h2>Systems built around people, not demos.</h2></div>
             <p>Each project began with a practical constraint and ended as something people could actually use.</p>
           </div>
           <div className="project-list">
-            {projects.map((project) => (
-              <article className={`project-card tone-${project.tone}`} key={project.number} data-reveal>
+            {projects.map((project, index) => (
+              <article className={`project-card tone-${project.tone}`} key={project.number} data-motion={index % 2 === 0 ? "left" : "right"}>
                 <div className="project-index">{project.number}</div>
                 <div className="project-main">
                   <span className="project-domain">{project.domain}</span>
@@ -215,47 +242,47 @@ function App() {
 
         <section className="about section-pad" id="about">
           <div className="about-grid">
-            <div className="about-title" data-reveal>
+            <div className="about-title" data-motion="left">
               <span className="kicker">How I work</span>
               <h2>A utility player for AI delivery.</h2>
             </div>
-            <div className="about-copy" data-reveal>
+            <div className="about-copy" data-motion="right">
               <p className="lead">I’m most useful where technology meets a messy real-world process.</p>
               <p>I can move from stakeholder needs and conversation design to APIs, interfaces, deployment, monitoring, and handoff. My goal is not simply to make an AI feature work—it is to make the whole system understandable, dependable, and useful.</p>
             </div>
           </div>
           <div className="principles-grid">
-            {principles.map(([number, title, copy]) => (
-              <article key={number} data-reveal><span>{number}</span><h3>{title}</h3><p>{copy}</p></article>
+            {principles.map(([number, title, copy], index) => (
+              <article key={number} data-motion={index % 2 === 0 ? "left" : "right"} style={{ "--motion-delay": `${index * 70}ms` }}><span>{number}</span><h3>{title}</h3><p>{copy}</p></article>
             ))}
           </div>
         </section>
 
         <section className="experience section-pad" id="experience">
-          <div className="section-heading compact" data-reveal>
+          <div className="section-heading compact" data-motion="left">
             <div><span className="kicker">Experience</span><h2>Building across the stack.</h2></div>
             <p>BSc Computer Science, Central Asian University · 2026</p>
           </div>
           <div className="experience-list">
-            {experience.map(([date, company, role]) => (
-              <div className="experience-row" key={company} data-reveal>
+            {experience.map(([date, company, role], index) => (
+              <div className="experience-row" key={company} data-motion={index % 2 === 0 ? "left" : "right"} style={{ "--motion-delay": `${index * 55}ms` }}>
                 <span>{date}</span><strong>{company}</strong><p>{role}</p>
               </div>
             ))}
           </div>
-          <div className="skills-block" data-reveal>
+          <div className="skills-block" data-motion="up">
             <span className="kicker">Working toolkit</span>
             <div className="skills-cloud">
               {[
                 "Python", "FastAPI", "Django", "React", "JavaScript", "SQL", "PostgreSQL", "MongoDB", "Redis", "Qdrant",
                 "LiveKit", "Asterisk", "SIP", "STT / TTS", "RAG", "OpenAI", "Gemini", "Docker", "Nginx", "GitLab CI/CD", "Prometheus",
-              ].map((skill) => <span key={skill}>{skill}</span>)}
+              ].map((skill, index) => <span key={skill} style={{ "--skill-delay": `${(index % 8) * 45}ms` }}>{skill}</span>)}
             </div>
           </div>
         </section>
 
         <section className="contact section-pad" id="contact">
-          <div className="contact-card" data-reveal>
+          <div className="contact-card" data-motion="scale">
             <span className="kicker light">Let’s build something useful</span>
             <h2>Have a hard problem where AI could make a real difference?</h2>
             <p>I’m interested in mission-driven AI work, production agent systems, and teams that care about what happens after the demo.</p>
@@ -273,6 +300,7 @@ function App() {
         <div className="social-links">
           <a href="https://github.com/TJ-Rustamov" target="_blank" rel="noreferrer" aria-label="GitHub"><Github /></a>
           <a href="https://www.linkedin.com/in/javlonbek-rustamov-7656b5312/" target="_blank" rel="noreferrer" aria-label="LinkedIn"><Linkedin /></a>
+          <a href="https://gitlab.sinoai.io/Rustamov" target="_blank" rel="noreferrer" aria-label="GitLab"><Gitlab /></a>
         </div>
       </footer>
     </div>
@@ -280,4 +308,3 @@ function App() {
 }
 
 export default App;
-
