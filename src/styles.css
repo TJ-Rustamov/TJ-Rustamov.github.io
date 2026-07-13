@@ -173,9 +173,9 @@ main, footer { position: relative; z-index: 2; }
 .skills-cloud span:hover { border-color: var(--lime); }
 
 .contact { padding-top: 40px; background: linear-gradient(180deg,rgba(7,5,17,.7),rgba(7,5,17,.9)); }
-.contact-card { --contact-mark-size: clamp(230px, 23vw, 370px); --contact-mark-right: clamp(24px, 5vw, 90px); position: relative; overflow: hidden; padding: clamp(42px,6vw,90px); border: 1px solid rgba(202,255,56,.35); border-radius: 34px; color: var(--text); background: linear-gradient(125deg,rgba(76,29,149,.96),rgba(20,8,48,.97) 57%,rgba(8,5,20,.98)); box-shadow: 0 25px 100px rgba(76,29,149,.3), inset 0 0 90px rgba(168,85,247,.12); }
-.contact-card::before { content: ""; position: absolute; width: var(--contact-mark-size); height: var(--contact-mark-size); right: var(--contact-mark-right); top: 50%; transform: translateY(-50%); border: 1px solid rgba(202,255,56,.25); border-radius: 50%; box-shadow: 0 0 80px rgba(202,255,56,.12); animation: orbitPulse 6s ease-in-out infinite; }
-.contact-card::after { content: "RJ"; position: absolute; display: grid; place-items: center; width: var(--contact-mark-size); height: var(--contact-mark-size); right: var(--contact-mark-right); top: 50%; transform: translateY(-50%); color: rgba(202,255,56,.11); font-size: clamp(76px, 9vw, 145px); line-height: 1; font-weight: 900; letter-spacing: -.09em; padding-right: .07em; }
+.contact-card { --contact-mark-size: clamp(230px, 23vw, 370px); --contact-mark-right: clamp(24px, 5vw, 90px); position: relative; overflow: hidden; padding: clamp(42px,6vw,90px); border: 1px solid rgba(202,255,56,.48); border-radius: 34px; color: var(--text); background: radial-gradient(circle at 10% 16%,rgba(139,92,246,.48),transparent 35%),radial-gradient(circle at 82% 50%,rgba(168,85,247,.16),transparent 29%),linear-gradient(128deg,#35106d 0%,#160a35 48%,#080613 100%); box-shadow: 0 25px 100px rgba(76,29,149,.3),inset 0 0 0 1px rgba(168,85,247,.22),inset 0 0 110px rgba(168,85,247,.1); }
+.contact-card::before { content: ""; position: absolute; width: var(--contact-mark-size); height: var(--contact-mark-size); right: var(--contact-mark-right); top: 50%; transform: translateY(-50%); border: 1px solid rgba(202,255,56,.52); border-radius: 50%; background: radial-gradient(circle at 38% 30%,rgba(139,92,246,.24),rgba(8,5,20,.94) 68%); box-shadow: 0 0 0 10px rgba(168,85,247,.07),0 0 0 11px rgba(202,255,56,.18),inset 0 0 55px rgba(168,85,247,.25),0 0 70px rgba(202,255,56,.1); animation: orbitPulse 6s ease-in-out infinite; }
+.contact-card::after { content: "RJ"; position: absolute; display: grid; place-items: center; width: var(--contact-mark-size); height: var(--contact-mark-size); right: var(--contact-mark-right); top: 50%; transform: translateY(-50%); color: rgba(202,255,56,.88); text-shadow: 0 0 34px rgba(202,255,56,.22); font-size: clamp(76px, 9vw, 145px); line-height: 1; font-weight: 900; letter-spacing: -.09em; padding-right: .07em; }
 .kicker.light { position: relative; z-index: 1; color: var(--lime); }
 .contact h2 { position: relative; z-index: 1; max-width: min(970px, calc(100% - 300px)); font-size: clamp(44px,6vw,82px); }
 .contact-card > p { position: relative; z-index: 1; max-width: 650px; color: #d0c8e3; font-size: 18px; line-height: 1.6; }
@@ -268,13 +268,13 @@ html[data-theme="light"] .experience-row { background: linear-gradient(90deg,tra
 html[data-theme="light"] .skills-block { background: rgba(255,253,248,.72); }
 html[data-theme="light"] .skills-cloud span { color: #26332d; background: rgba(63,114,89,.1); border-color: rgba(63,114,89,.18); }
 html[data-theme="light"] .contact { background: linear-gradient(180deg,rgba(244,240,232,.72),rgba(232,225,212,.92)); }
-html[data-theme="light"] .contact-card { color: #17211d; border-color: rgba(23,33,29,.22); background: linear-gradient(125deg,#f08065,#ee694b 54%,#d85b40); box-shadow: 0 25px 80px rgba(88,46,34,.18),inset 0 0 90px rgba(255,244,223,.14); }
-html[data-theme="light"] .contact-card::before { border-color: rgba(23,33,29,.3); box-shadow: 0 0 70px rgba(23,33,29,.08); }
-html[data-theme="light"] .contact-card::after { color: rgba(23,33,29,.13); }
-html[data-theme="light"] .contact-card > p { color: #442f29; }
-html[data-theme="light"] .kicker.light { color: #17211d; }
-html[data-theme="light"] .button-light { color: #f4f0e8; background: #17211d; box-shadow: 0 10px 32px rgba(23,33,29,.18); }
-html[data-theme="light"] .copy-button { color: #17211d; border-color: rgba(23,33,29,.5); background: rgba(255,250,243,.14); }
+html[data-theme="light"] .contact-card { color: #17211d; border-color: rgba(63,114,89,.48); background: radial-gradient(circle at 8% 12%,rgba(238,105,75,.2),transparent 34%),radial-gradient(circle at 86% 48%,rgba(63,114,89,.18),transparent 30%),linear-gradient(125deg,#fffaf2 0%,#f4ede2 58%,#e7dfd1 100%); box-shadow: 0 25px 80px rgba(54,72,62,.14),inset 0 0 0 1px rgba(255,255,255,.78),inset 0 0 100px rgba(238,105,75,.05); }
+html[data-theme="light"] .contact-card::before { border-color: rgba(238,105,75,.72); background: radial-gradient(circle at 35% 28%,#56836b,#294c3b 70%); box-shadow: 0 0 0 10px rgba(63,114,89,.08),0 0 0 11px rgba(238,105,75,.3),inset 0 0 55px rgba(23,33,29,.2),0 18px 55px rgba(41,76,59,.2); }
+html[data-theme="light"] .contact-card::after { color: #fff6e9; text-shadow: 0 3px 24px rgba(23,33,29,.28); }
+html[data-theme="light"] .contact-card > p { color: #536059; }
+html[data-theme="light"] .kicker.light { color: #d6533a; }
+html[data-theme="light"] .button-light { color: #fffaf3; background: #ee694b; box-shadow: 0 10px 32px rgba(238,105,75,.24); }
+html[data-theme="light"] .copy-button { color: #294c3b; border-color: rgba(63,114,89,.58); background: rgba(255,250,243,.62); }
 html[data-theme="light"] footer { background: rgba(244,240,232,.95); }
 html[data-theme="light"] .social-links a { color: #294c3b; background: rgba(63,114,89,.07); }
 html[data-theme="light"] .social-links a:hover { color: #fffaf3; }
