@@ -109,13 +109,6 @@ export const caseStudies = {
         description: "The ordinary days—shared rooms, difficult questions, and work in progress—became the memories that stayed.",
       },
       {
-        src: "graduation/memories/before-lounge.webp",
-        alt: "A relaxed photograph of university friends sitting together in a campus lounge",
-        label: "Between classes",
-        title: "The unplanned moments mattered too",
-        description: "Some of the most lasting memories came between the deadlines—in laughter, conversation, and time shared without an agenda.",
-      },
-      {
         src: "graduation/memories/before-tech-event.webp",
         alt: "A small group of students together at a Central Asian University technology event",
         label: "Beyond class",
