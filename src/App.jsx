@@ -134,7 +134,7 @@ const independentProjects = [
     stack: ["FastAPI", "React", "WebSockets", "Whisper", "pyannote", "SQLite"],
     tone: "purple",
     link: "./projects/meeting-whisperer/",
-    linkLabel: "Try walkthrough",
+    linkLabel: "View real captures",
     internal: true,
   },
   {
@@ -151,7 +151,7 @@ const independentProjects = [
     stack: ["Django", "React", "Channels", "Gemini", "Whisper", "Kokoro"],
     tone: "green",
     link: "./projects/ielts-examiner/",
-    linkLabel: "Try walkthrough",
+    linkLabel: "View real screens",
     internal: true,
   },
 ];
@@ -159,19 +159,19 @@ const independentProjects = [
 const academicProjects = [
   {
     number: "07",
-    domain: "Academic work · BSc capstone",
-    title: "Graduation Capstone",
-    summary: "The research, methodology, architecture, and team story behind IELTS Mock Examiner, presented as a focused academic case study.",
+    domain: "Education · BSc Computer Science",
+    title: "Central Asian University Graduation",
+    summary: "My broader graduation story: the foundations, people, applied work, and capstone that shaped my transition into full-stack AI engineering.",
     impact: [
-      "Framed an access problem around repeated IELTS practice and feedback",
-      "Documented an integrated realtime speech and writing architecture",
-      "Translated engineering output into an academic poster and presentation",
-      "Completed at Central Asian University Engineering School",
+      "Graduated from the Central Asian University Engineering School",
+      "Built foundations across software engineering, systems, and applied AI",
+      "Turned academic learning into production-oriented full-stack work",
+      "Completed and presented a collaborative BSc capstone",
     ],
     stack: ["Applied AI", "Research", "System Design", "Technical Communication"],
     tone: "orange",
     link: "./projects/graduation-capstone/",
-    linkLabel: "View capstone",
+    linkLabel: "View graduation story",
     internal: true,
   },
 ];
@@ -194,7 +194,7 @@ const projectGroups = [
   },
   {
     label: "Academic work",
-    description: "Graduation research and technical communication behind a complete applied AI capstone.",
+    description: "The education and academic work behind my move from computer science student to AI engineer.",
     projects: academicProjects,
   },
 ];
@@ -268,6 +268,7 @@ function App() {
           <a href="#work" onClick={() => setMenuOpen(false)}>Work</a>
           <a href="#about" onClick={() => setMenuOpen(false)}>About</a>
           <a href="#experience" onClick={() => setMenuOpen(false)}>Experience</a>
+          <a href="#graduation" onClick={() => setMenuOpen(false)}>Graduation</a>
           <button
             className="theme-toggle"
             type="button"
@@ -398,6 +399,24 @@ function App() {
                 "LiveKit", "Asterisk", "SIP", "STT / TTS", "RAG", "OpenAI", "Gemini", "Docker", "Nginx", "GitLab CI/CD", "Prometheus",
               ].map((skill, index) => <span key={skill} style={{ "--skill-delay": `${(index % 8) * 45}ms` }}>{skill}</span>)}
             </div>
+          </div>
+        </section>
+
+        <section className="graduation-home section-pad" id="graduation">
+          <div className="graduation-home-copy" data-motion="left">
+            <span className="kicker">Graduation · Class of 2026</span>
+            <h2>Central Asian University gave the work a foundation.</h2>
+            <p>I graduated with a BSc in Computer Science from the Engineering School in Tashkent. The degree strengthened the software, systems, collaboration, and communication skills I now bring to production AI work.</p>
+            <div className="graduation-home-actions">
+              <a className="button button-dark" href="./projects/graduation-capstone/">Explore the graduation story <ArrowUpRight /></a>
+              <a className="text-link" href="https://centralasian.uz/computer-science" target="_blank" rel="noreferrer">Official CS program <ArrowUpRight size={16} /></a>
+            </div>
+          </div>
+          <div className="graduation-home-card" data-motion="right">
+            <span>2022—2026</span>
+            <strong>BSc<br />Computer Science</strong>
+            <p>Central Asian University<br />Engineering School</p>
+            <a href="https://centralasian.uz/" target="_blank" rel="noreferrer">Visit university <ArrowUpRight size={16} /></a>
           </div>
         </section>
 
