@@ -188,13 +188,13 @@ const projectGroups = [
     projects: projects.slice(2),
   },
   {
-    label: "Independent AI products",
-    description: "Self-directed full-stack systems exploring local speech intelligence and accessible language assessment.",
+    label: "Independent full-stack + AI products",
+    description: "Self-directed full-stack products combining complete user workflows with local speech intelligence and language assessment.",
     projects: [independentProjects[1], independentProjects[0]],
   },
   {
     label: "Academic work",
-    description: "The education and academic work behind my move from computer science student to AI engineer.",
+    description: "The education and academic work behind my growth from computer science student to full-stack and AI engineer.",
     projects: academicProjects,
   },
 ];
@@ -347,9 +347,9 @@ function App() {
         <section className="hero section-pad">
           <div className="hero-copy" data-motion="left">
             <div className="eyebrow"><span className="status-dot" /> Tashkent, Uzbekistan · Building for real-world impact</div>
-            <h1>I build AI systems that make complex services <em>clear and usable.</em></h1>
+            <h1>I build full-stack products and AI systems that are <em>clear and usable.</em></h1>
             <p className="hero-lede">
-              I’m Javlonbek, a fullstack AI engineer working across voice agents, multilingual platforms, and production infrastructure—especially for government, healthcare, and education.
+              I’m Javlonbek, a full-stack and AI engineer working across frontend experiences, backend platforms, production infrastructure, and intelligent features—especially for government, healthcare, and education.
             </p>
             <div className="hero-actions">
               <a className="button button-dark" href="#work">Explore selected work <ArrowUpRight /></a>
@@ -361,24 +361,24 @@ function App() {
             <div className="orbit orbit-two" />
             <div className="signal-card signal-main">
               <span className="signal-label">CURRENT FOCUS</span>
-              <strong>AI for public impact</strong>
-              <p>From a citizen’s question to a system that can respond, act, and hand off safely.</p>
+              <strong>Full-stack + AI delivery</strong>
+              <p>From product interface and APIs to intelligent workflows, deployment, and reliable handoff.</p>
             </div>
             <div className="signal-card signal-small signal-top"><span className="voice-label">Voice AI</span><VoiceWaveform /></div>
             <div className="signal-card signal-small signal-bottom">3 languages <span>●</span></div>
             <div className="hero-monogram">RJ</div>
           </div>
           <div className="hero-proof" data-motion="up">
-            <div><strong>Production</strong><span>Voice & LLM systems</span></div>
-            <div><strong>4 domains</strong><span>Government to health</span></div>
-            <div><strong>End-to-end</strong><span>Scope, build, deploy</span></div>
+            <div><strong>Full-stack</strong><span>Frontend to infrastructure</span></div>
+            <div><strong>Applied AI</strong><span>Voice, RAG & LLMs</span></div>
+            <div><strong>Production</strong><span>Scope, build, deploy</span></div>
             <div><strong>3 languages</strong><span>Uzbek, English, Russian</span></div>
           </div>
         </section>
 
         <section className="marquee" aria-label="Core technologies">
           <div className="marquee-track">
-            {["Python", "FastAPI", "React", "LiveKit", "RAG", "PostgreSQL", "Docker", "Voice AI", "Python", "FastAPI", "React", "LiveKit", "RAG", "PostgreSQL", "Docker", "Voice AI"].map((item, index) => (
+            {["React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD", "React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD"].map((item, index) => (
               <span key={`${item}-${index}`}>{item}<i>✦</i></span>
             ))}
           </div>
@@ -386,8 +386,8 @@ function App() {
 
         <section className="work section-pad" id="work">
           <div className="section-heading" data-motion="left">
-            <div><span className="kicker">Selected work</span><h2>Systems built around people, not demos.</h2></div>
-            <p>Each project began with a practical constraint and ended as something people could actually use.</p>
+            <div><span className="kicker">Selected work</span><h2>Complete products, from interface to intelligence.</h2></div>
+            <p>Each project combines product thinking, full-stack execution, and—where it adds real value—applied AI.</p>
           </div>
           <div className="project-groups">
             {projectGroups.map((group, groupIndex) => (
@@ -427,11 +427,11 @@ function App() {
           <div className="about-grid">
             <div className="about-title" data-motion="left">
               <span className="kicker">How I work</span>
-              <h2>A utility player for AI delivery.</h2>
+              <h2>A full-stack engineer with an AI edge.</h2>
             </div>
             <div className="about-copy" data-motion="right">
-              <p className="lead">I’m most useful where technology meets a messy real-world process.</p>
-              <p>I can move from stakeholder needs and conversation design to APIs, interfaces, deployment, monitoring, and handoff. My goal is not simply to make an AI feature work—it is to make the whole system understandable, dependable, and useful.</p>
+              <p className="lead">I turn messy real-world processes into complete, production-ready products.</p>
+              <p>I work across interfaces, APIs, data models, integrations, deployment, and monitoring, then apply AI where it meaningfully improves the experience. The result is not just a working model or feature, but a dependable system people can actually use.</p>
             </div>
           </div>
           <div className="principles-grid">
@@ -468,7 +468,7 @@ function App() {
           <div className="graduation-home-copy" data-motion="left">
             <span className="kicker">Graduation · Class of 2026</span>
             <h2>Central Asian University gave the work a foundation.</h2>
-            <p>I graduated with a BSc in Computer Science from the Engineering School in Tashkent. The degree strengthened the software, systems, collaboration, and communication skills I now bring to production AI work.</p>
+            <p>I graduated with a BSc in Computer Science from the Engineering School in Tashkent. The degree strengthened the software, systems, collaboration, and communication skills I now bring to full-stack product development and production AI.</p>
             <div className="graduation-home-actions">
               <a className="button button-dark" href="./projects/graduation-capstone/">Explore the graduation story <ArrowUpRight /></a>
               <a className="text-link" href="https://centralasian.uz/computer-science" target="_blank" rel="noreferrer">Official CS program <ArrowUpRight size={16} /></a>
@@ -484,8 +484,8 @@ function App() {
         <section className="contact section-pad" id="contact">
           <div className="contact-card" data-motion="scale">
             <span className="kicker light">Let’s build something useful</span>
-            <h2>Have a hard problem where AI could make a real difference?</h2>
-            <p>I’m interested in mission-driven AI work, production agent systems, and teams that care about what happens after the demo.</p>
+            <h2>Need a complete product, an intelligent system, or both?</h2>
+            <p>I’m interested in full-stack product work, production AI systems, and teams that care about dependable software long after launch.</p>
             <div className="contact-actions">
               <a
                 className="button button-light"
@@ -500,7 +500,7 @@ function App() {
       </main>
 
       <footer>
-        <div><strong>Javlonbek Rustamov</strong><span>AI Engineer & Fullstack Developer</span></div>
+        <div><strong>Javlonbek Rustamov</strong><span>Full-Stack & AI Engineer</span></div>
         <p>Designed and built with care in Tashkent.</p>
         <div className="social-links">
           <a href="https://github.com/TJ-Rustamov" target="_blank" rel="noreferrer" aria-label="GitHub"><Github /></a>
