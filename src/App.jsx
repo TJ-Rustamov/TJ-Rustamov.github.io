@@ -220,7 +220,7 @@ function FeaturedProjectCard({ project, motion }) {
     return (
       <article className="featured-project featured-meeting" data-motion={motion}>
         <div className="featured-meeting-screen">
-          <img src={portfolioAsset("meeting/meeting-detail.webp")} alt="Meeting Whisperer meeting detail with recording and speaker-labelled transcript" loading="lazy" />
+          <img src={portfolioAsset("meeting/meeting-detail-sanitized.png")} alt="Meeting Whisperer meeting detail with recording and speaker-labelled transcript" loading="lazy" />
           <div className="meeting-screen-line" aria-hidden="true"><i /><span>Local capture · diarized transcript</span></div>
         </div>
         <div className="featured-project-copy">

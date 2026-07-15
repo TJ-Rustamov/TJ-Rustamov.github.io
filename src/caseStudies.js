@@ -22,7 +22,7 @@ export const caseStudies = {
     ],
     slides: [
       {
-        src: "meeting/meeting-detail.webp",
+        src: "meeting/meeting-detail-sanitized.png",
         alt: "Meeting Whisperer detail page with a real video recording, playback timeline, speaker-labelled transcript, and diarization controls",
         label: "Meeting detail",
         title: "Recording and diarized transcript",
@@ -165,7 +165,7 @@ export const caseStudies = {
       },
     ],
     poster: {
-      src: "graduation/academic-poster.webp",
+      src: "graduation/academic-poster-sanitized.png",
       alt: "Full Central Asian University capstone poster for IELTS Mock Examiner by A. Khasakhojaev and J. Rustamov, supervised by Eugene Castro",
       label: "Original academic capstone poster",
     },
