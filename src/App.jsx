@@ -346,7 +346,7 @@ function App() {
       <main id="top">
         <section className="hero section-pad">
           <div className="hero-copy" data-motion="left">
-            <div className="eyebrow"><span className="status-dot" /> Tashkent, Uzbekistan · Building for real-world impact</div>
+            <div className="eyebrow"><span className="status-dot" /> Javlonbek Rustamov · Tashkent, Uzbekistan</div>
             <h1>I build full-stack products and AI systems that are <em>clear and usable.</em></h1>
             <p className="hero-lede">
               I’m Javlonbek, a full-stack and AI engineer working across frontend experiences, backend platforms, production infrastructure, and intelligent features—especially for government, healthcare, and education.
