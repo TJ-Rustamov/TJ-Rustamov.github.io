@@ -349,7 +349,7 @@ function App() {
             <div className="eyebrow"><span className="status-dot" /> Javlonbek Rustamov · Tashkent, Uzbekistan</div>
             <h1>I build full-stack products and AI systems that are <em>clear and usable.</em></h1>
             <p className="hero-lede">
-              I’m Javlonbek, a full-stack and AI engineer working across frontend experiences, backend platforms, production infrastructure, and intelligent features—especially for government, healthcare, and education.
+              I’m Javlonbek, a full-stack and AI engineer working across frontend experiences, Python backend platforms, production infrastructure, and intelligent features—especially for government, healthcare, and education.
             </p>
             <div className="hero-actions">
               <a className="button button-dark" href="#work">Explore selected work <ArrowUpRight /></a>
@@ -362,7 +362,7 @@ function App() {
             <div className="signal-card signal-main">
               <span className="signal-label">CURRENT FOCUS</span>
               <strong>Full-stack + AI delivery</strong>
-              <p>From product interface and APIs to intelligent workflows, deployment, and reliable handoff.</p>
+              <p>From product interfaces and Python APIs to intelligent workflows, deployment, and reliable handoff.</p>
             </div>
             <div className="signal-card signal-small signal-top"><span className="voice-label">Voice AI</span><VoiceWaveform /></div>
             <div className="signal-card signal-small signal-bottom">3 languages <span>●</span></div>
@@ -378,7 +378,7 @@ function App() {
 
         <section className="marquee" aria-label="Core technologies">
           <div className="marquee-track">
-            {["React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD", "React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD"].map((item, index) => (
+            {["Python", "React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD", "Python", "React", "FastAPI", "Django", "PostgreSQL", "Docker", "Voice AI", "RAG", "CI/CD"].map((item, index) => (
               <span key={`${item}-${index}`}>{item}<i>✦</i></span>
             ))}
           </div>
@@ -431,7 +431,7 @@ function App() {
             </div>
             <div className="about-copy" data-motion="right">
               <p className="lead">I turn messy real-world processes into complete, production-ready products.</p>
-              <p>I work across interfaces, APIs, data models, integrations, deployment, and monitoring, then apply AI where it meaningfully improves the experience. The result is not just a working model or feature, but a dependable system people can actually use.</p>
+              <p>I work across interfaces, Python APIs, data models, integrations, deployment, and monitoring, then apply AI where it meaningfully improves the experience. The result is not just a working model or feature, but a dependable system people can actually use.</p>
             </div>
           </div>
           <div className="principles-grid">
