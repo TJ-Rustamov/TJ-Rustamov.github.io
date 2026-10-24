@@ -1,7 +1,6 @@
 package uz.camdect.ui
 
 import android.Manifest
-import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
@@ -23,13 +22,13 @@ import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
 import android.os.SystemClock
+import android.view.Choreographer
 import android.view.MotionEvent
 import android.view.Surface
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.animation.LinearInterpolator
 import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
@@ -60,6 +59,7 @@ import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
 import uz.camdect.R
+import uz.camdect.core.HeadingFilter
 import uz.camdect.data.CameraRepository
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
@@ -97,9 +97,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     // Latest fix from our own GPS listener (UI only; alerts come from RadarService).
     private var fix: Location? = null
+    private var fixAt = 0L // elapsedRealtime when the fix arrived
     private var course = Double.NaN
     private var speedKmh = 0
-    private var animator: ValueAnimator? = null
     private var shownLat = Double.NaN
     private var shownLon = Double.NaN
     private var shownCourse = Double.NaN
@@ -108,17 +108,33 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var touchY = 0f
     private var lastTouchAt = 0L
 
-    // Phone compass: gives the arrow a direction when GPS course is unknown (stopped / slow).
+    // Heading: gyro for instant turns, GPS/compass to correct drift (see HeadingFilter).
     private lateinit var sensors: SensorManager
-    private var compassDeg = Double.NaN
+    private val headingFilter = HeadingFilter()
     private var declination = Float.NaN
-    private var lastCompassDraw = 0L
-    private val rotation = FloatArray(9)
+    private val absRotation = FloatArray(9)
+    private val gyroRotation = FloatArray(9)
+    private var gyroWasFlat: Boolean? = null
     private var gravity: FloatArray? = null
     private var geomagnetic: FloatArray? = null
     private val sensorListener = object : SensorEventListener {
         override fun onSensorChanged(e: SensorEvent) = onSensor(e)
         override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
+
+    // Frame loop: redraws the arrow/map ~30x per second with dead reckoning between GPS fixes.
+    private var frameLoopRunning = false
+    private var lastFrameAt = 0L
+    private val frameCallback = object : Choreographer.FrameCallback {
+        override fun doFrame(frameTimeNanos: Long) {
+            if (!frameLoopRunning) return
+            val now = SystemClock.elapsedRealtime()
+            if (now - lastFrameAt >= FRAME_MS) {
+                lastFrameAt = now
+                onFrame(now)
+            }
+            Choreographer.getInstance().postFrameCallback(this)
+        }
     }
     private val touchSlop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
 
@@ -322,7 +338,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         lm.removeUpdates(this)
         if (lm.allProviders.contains(LocationManager.GPS_PROVIDER)) {
-            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 0f, this, Looper.getMainLooper())
+            // 0 ms: every fix the chip produces (1-10 Hz depending on phone).
+            lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0L, 0f, this, Looper.getMainLooper())
             lm.getLastKnownLocation(LocationManager.GPS_PROVIDER)?.let { onLocationChanged(it) }
         }
         if (lm.allProviders.contains(LocationManager.NETWORK_PROVIDER)) {
@@ -332,7 +349,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private fun stopUiLocation() {
         (getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(this)
-        animator?.cancel()
     }
 
     override fun onLocationChanged(location: Location) {
@@ -342,8 +358,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
             last.provider == LocationManager.GPS_PROVIDER && location.time - last.time < 10_000
         ) return
         fix = location
-        speedKmh = if (location.hasSpeed()) (location.speed * 3.6).toInt() else 0
-        if (location.hasBearing() && location.hasSpeed() && location.speed >= GPS_COURSE_MIN_MPS) course = location.bearing.toDouble()
+        fixAt = SystemClock.elapsedRealtime()
+        val speedMps = if (location.hasSpeed()) location.speed.toDouble() else 0.0
+        speedKmh = (speedMps * 3.6).toInt()
+        course = if (location.hasBearing() && speedMps >= GPS_COURSE_MIN_MPS) location.bearing.toDouble() else Double.NaN
+        headingFilter.onGps(course, speedMps)
         if (declination.isNaN()) declination = GeomagneticField(
             location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), System.currentTimeMillis()
         ).declination
@@ -362,53 +381,84 @@ class MainActivity : AppCompatActivity(), LocationListener {
             positionOverlay.courseDeg = shownCourse
             if (mode == ViewMode.FREE) setMode(followMode) else moveCamera(shownLat, shownLon, shownCourse, snap = true)
             map.invalidate()
-            return
         }
-        animateTo(location.latitude, location.longitude, arrowCourse())
     }
 
-    private fun usingCompass() = speedKmh < COMPASS_BELOW_KMH || course.isNaN()
+    private fun arrowCourse(): Double = if (headingFilter.heading.isNaN()) course else headingFilter.heading
 
-    /** GPS course while driving; phone compass when slow or stopped. */
-    private fun arrowCourse(): Double = if (usingCompass() && !compassDeg.isNaN()) compassDeg else course
-
-    private fun onSensor(e: SensorEvent) {
-        when (e.sensor.type) {
-            Sensor.TYPE_ROTATION_VECTOR -> SensorManager.getRotationMatrixFromVector(rotation, e.values)
-            Sensor.TYPE_ACCELEROMETER -> { gravity = e.values.clone(); if (!fusedFromAccelMag()) return }
-            Sensor.TYPE_MAGNETIC_FIELD -> { geomagnetic = e.values.clone(); if (!fusedFromAccelMag()) return }
-            else -> return
+    /**
+     * Where we are *now*: the last fix pushed forward by speed × time since it arrived
+     * (dead reckoning), then eased so corrections from new fixes do not jump.
+     */
+    private fun onFrame(now: Long) {
+        val f = fix ?: return
+        if (shownLat.isNaN()) return
+        val heading = arrowCourse()
+        val speedMps = if (f.hasSpeed()) f.speed.toDouble() else 0.0
+        var targetLat = f.latitude
+        var targetLon = f.longitude
+        if (speedMps >= GPS_COURSE_MIN_MPS && !heading.isNaN()) {
+            val dt = ((now - fixAt) / 1000.0).coerceIn(0.0, MAX_PREDICT_S)
+            val p = GeoPoint(f.latitude, f.longitude).destinationPoint(speedMps * dt, heading)
+            targetLat = p.latitude; targetLon = p.longitude
         }
-        val heading = headingFromRotation()
-        compassDeg = if (compassDeg.isNaN()) heading else {
-            val diff = ((heading - compassDeg + 540) % 360) - 180
-            (compassDeg + diff * 0.2 + 360) % 360
-        }
-        if (!usingCompass() || shownLat.isNaN()) return
-        val now = SystemClock.elapsedRealtime()
-        if (now - lastCompassDraw < 66) return // ~15 fps is plenty
-        lastCompassDraw = now
-        if (animator?.isRunning == true) return
-        shownCourse = compassDeg
-        positionOverlay.courseDeg = compassDeg
-        moveCamera(shownLat, shownLon, compassDeg)
+        shownLat += (targetLat - shownLat) * POSITION_EASE
+        shownLon += (targetLon - shownLon) * POSITION_EASE
+        shownCourse = heading
+        positionOverlay.position = GeoPoint(shownLat, shownLon)
+        positionOverlay.courseDeg = shownCourse
+        moveCamera(shownLat, shownLon, shownCourse)
         map.invalidate()
     }
 
-    private fun fusedFromAccelMag(): Boolean {
-        val g = gravity ?: return false
-        val m = geomagnetic ?: return false
-        return SensorManager.getRotationMatrix(rotation, null, g, m)
+    private fun startFrameLoop() {
+        if (frameLoopRunning) return
+        frameLoopRunning = true
+        Choreographer.getInstance().postFrameCallback(frameCallback)
+    }
+
+    private fun stopFrameLoop() {
+        frameLoopRunning = false
+        Choreographer.getInstance().removeFrameCallback(frameCallback)
+    }
+
+    private fun onSensor(e: SensorEvent) {
+        val moving = speedKmh >= COMPASS_BELOW_KMH
+        when (e.sensor.type) {
+            // Gyro + accelerometer, no magnetometer: smooth and instant, arbitrary zero.
+            Sensor.TYPE_GAME_ROTATION_VECTOR -> {
+                SensorManager.getRotationMatrixFromVector(gyroRotation, e.values)
+                val flat = isFlat(gyroRotation)
+                headingFilter.onRelative(headingOf(gyroRotation, flat), SystemClock.elapsedRealtime(), reset = flat != gyroWasFlat)
+                gyroWasFlat = flat
+            }
+            Sensor.TYPE_ROTATION_VECTOR -> {
+                SensorManager.getRotationMatrixFromVector(absRotation, e.values)
+                headingFilter.onCompass(trueHeading(absRotation), moving)
+            }
+            Sensor.TYPE_ACCELEROMETER, Sensor.TYPE_MAGNETIC_FIELD -> {
+                if (e.sensor.type == Sensor.TYPE_ACCELEROMETER) gravity = e.values.clone() else geomagnetic = e.values.clone()
+                val g = gravity ?: return
+                val m = geomagnetic ?: return
+                if (SensorManager.getRotationMatrix(absRotation, null, g, m)) headingFilter.onCompass(trueHeading(absRotation), moving)
+            }
+        }
+    }
+
+    private fun isFlat(r: FloatArray) = abs(r[8]) > 0.75f
+
+    private fun trueHeading(r: FloatArray): Double {
+        val decl = if (declination.isNaN()) 0f else declination
+        return (headingOf(r, isFlat(r)) + decl + 720) % 360
     }
 
     /**
-     * Direction the phone faces, degrees from true north. Flat phone: the top edge of the screen.
-     * Upright (car mount): the back of the phone, i.e. the windscreen direction.
+     * Direction the phone faces in the rotation matrix's frame. Flat phone: the top edge of the
+     * screen. Upright (car mount): the back of the phone, i.e. the windscreen direction.
      */
     @Suppress("DEPRECATION")
-    private fun headingFromRotation(): Double {
-        val r = rotation // device axes in world (east, north, up) coordinates: columns X, Y, Z
-        val flat = abs(r[8]) > 0.75f
+    private fun headingOf(r: FloatArray, flat: Boolean): Double {
+        // Columns of r are the device X, Y, Z axes in world (east, north, up) coordinates.
         val (east, north) = if (flat) {
             when (windowManager.defaultDisplay.rotation) {
                 Surface.ROTATION_90 -> -r[0] to -r[3]
@@ -419,41 +469,19 @@ class MainActivity : AppCompatActivity(), LocationListener {
         } else {
             -r[2] to -r[5]
         }
-        val magnetic = Math.toDegrees(atan2(east.toDouble(), north.toDouble()))
-        val decl = if (declination.isNaN()) 0f else declination
-        return (magnetic + decl + 720) % 360
+        return (Math.toDegrees(atan2(east.toDouble(), north.toDouble())) + 360) % 360
     }
 
-    private fun startCompass() {
+    private fun startSensors() {
+        sensors.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)?.let {
+            sensors.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_GAME)
+        }
         val rv = sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
         if (rv != null) {
             sensors.registerListener(sensorListener, rv, SensorManager.SENSOR_DELAY_UI)
         } else {
             sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let { sensors.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
             sensors.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let { sensors.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
-        }
-    }
-
-    /** Glides the arrow (and map, when following) to the new fix over ~1 s, like a game camera. */
-    private fun animateTo(lat: Double, lon: Double, newCourse: Double) {
-        animator?.cancel()
-        val fromLat = shownLat; val fromLon = shownLon
-        val fromCourse = if (shownCourse.isNaN()) newCourse else shownCourse
-        val turn = if (newCourse.isNaN() || fromCourse.isNaN()) 0.0 else ((newCourse - fromCourse + 540) % 360) - 180
-        animator = ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 950
-            interpolator = LinearInterpolator()
-            addUpdateListener { a ->
-                val f = a.animatedValue as Float
-                shownLat = fromLat + (lat - fromLat) * f
-                shownLon = fromLon + (lon - fromLon) * f
-                shownCourse = if (newCourse.isNaN()) fromCourse else (fromCourse + turn * f + 360) % 360
-                positionOverlay.position = GeoPoint(shownLat, shownLon)
-                positionOverlay.courseDeg = shownCourse
-                moveCamera(shownLat, shownLon, shownCourse)
-                map.invalidate()
-            }
-            start()
         }
     }
 
@@ -689,13 +717,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
         super.onResume()
         map.onResume()
         startUiLocation()
-        startCompass()
+        startSensors()
+        startFrameLoop()
     }
 
     override fun onPause() {
         // UI GPS sleeps in background; RadarService keeps alerting.
         stopUiLocation()
         sensors.unregisterListener(sensorListener)
+        stopFrameLoop()
         map.onPause()
         super.onPause()
     }
@@ -706,7 +736,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
     }
 
     companion object {
-        private const val GPS_COURSE_MIN_MPS = 1.5f
+        private const val GPS_COURSE_MIN_MPS = 1.5
+        private const val FRAME_MS = 33L
+        private const val MAX_PREDICT_S = 2.0
+        private const val POSITION_EASE = 0.35
         private const val COMPASS_BELOW_KMH = 8
         private const val REFOLLOW_MS = 12_000L
     }
