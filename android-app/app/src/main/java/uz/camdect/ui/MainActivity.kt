@@ -8,6 +8,11 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
+import android.hardware.GeomagneticField
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.location.Location
 import android.location.LocationListener
 import android.location.LocationManager
@@ -17,7 +22,9 @@ import android.os.Bundle
 import android.os.Looper
 import android.os.PowerManager
 import android.provider.Settings
+import android.os.SystemClock
 import android.view.MotionEvent
+import android.view.Surface
 import android.view.View
 import android.view.ViewConfiguration
 import android.view.ViewGroup
@@ -61,6 +68,7 @@ import uz.camdect.service.DriveState
 import uz.camdect.service.RadarService
 import java.io.File
 import kotlin.math.abs
+import kotlin.math.atan2
 import kotlin.math.hypot
 
 class MainActivity : AppCompatActivity(), LocationListener {
@@ -98,6 +106,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     private var touchX = 0f
     private var touchY = 0f
+    private var lastTouchAt = 0L
+
+    // Phone compass: gives the arrow a direction when GPS course is unknown (stopped / slow).
+    private lateinit var sensors: SensorManager
+    private var compassDeg = Double.NaN
+    private var declination = Float.NaN
+    private var lastCompassDraw = 0L
+    private val rotation = FloatArray(9)
+    private var gravity: FloatArray? = null
+    private var geomagnetic: FloatArray? = null
+    private val sensorListener = object : SensorEventListener {
+        override fun onSensorChanged(e: SensorEvent) = onSensor(e)
+        override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+    }
     private val touchSlop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
 
     private val requestPermissions =
@@ -121,6 +143,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         prefs = Prefs(this)
+        sensors = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         setupEdgeToEdge()
         setContentView(R.layout.activity_main)
         speedView = findViewById(R.id.speed)
@@ -213,12 +236,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         // Any drag / pinch / rotate by the user leaves follow mode (like Google Maps).
         map.setOnTouchListener { _, ev ->
             when (ev.actionMasked) {
-                MotionEvent.ACTION_DOWN -> { touchX = ev.x; touchY = ev.y }
+                MotionEvent.ACTION_DOWN -> { touchX = ev.x; touchY = ev.y; lastTouchAt = SystemClock.elapsedRealtime() }
                 MotionEvent.ACTION_POINTER_DOWN -> if (mode != ViewMode.FREE) setMode(ViewMode.FREE)
                 MotionEvent.ACTION_MOVE -> if (mode != ViewMode.FREE &&
                     hypot((ev.x - touchX).toDouble(), (ev.y - touchY).toDouble()) > touchSlop
                 ) setMode(ViewMode.FREE)
             }
+            if (ev.actionMasked != MotionEvent.ACTION_DOWN) lastTouchAt = SystemClock.elapsedRealtime()
             false
         }
     }
@@ -319,21 +343,95 @@ class MainActivity : AppCompatActivity(), LocationListener {
         ) return
         fix = location
         speedKmh = if (location.hasSpeed()) (location.speed * 3.6).toInt() else 0
-        if (location.hasBearing() && location.hasSpeed() && location.speed >= 1.5f) course = location.bearing.toDouble()
+        if (location.hasBearing() && location.hasSpeed() && location.speed >= GPS_COURSE_MIN_MPS) course = location.bearing.toDouble()
+        if (declination.isNaN()) declination = GeomagneticField(
+            location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), System.currentTimeMillis()
+        ).declination
+        // Back to following a while after the user stopped panning, like car navigation apps.
+        if (mode == ViewMode.FREE && DriveState.flow.value.running &&
+            SystemClock.elapsedRealtime() - lastTouchAt > REFOLLOW_MS
+        ) setMode(followMode)
         positionOverlay.accuracyM = location.accuracy
         speedView.text = speedKmh.toString()
         updateSubStatus()
 
         if (shownLat.isNaN()) {
             // First fix: jump there.
-            shownLat = location.latitude; shownLon = location.longitude; shownCourse = course
+            shownLat = location.latitude; shownLon = location.longitude; shownCourse = arrowCourse()
             positionOverlay.position = GeoPoint(shownLat, shownLon)
-            positionOverlay.courseDeg = course
-            if (mode == ViewMode.FREE) setMode(followMode) else moveCamera(shownLat, shownLon, course, snap = true)
+            positionOverlay.courseDeg = shownCourse
+            if (mode == ViewMode.FREE) setMode(followMode) else moveCamera(shownLat, shownLon, shownCourse, snap = true)
             map.invalidate()
             return
         }
-        animateTo(location.latitude, location.longitude, course)
+        animateTo(location.latitude, location.longitude, arrowCourse())
+    }
+
+    private fun usingCompass() = speedKmh < COMPASS_BELOW_KMH || course.isNaN()
+
+    /** GPS course while driving; phone compass when slow or stopped. */
+    private fun arrowCourse(): Double = if (usingCompass() && !compassDeg.isNaN()) compassDeg else course
+
+    private fun onSensor(e: SensorEvent) {
+        when (e.sensor.type) {
+            Sensor.TYPE_ROTATION_VECTOR -> SensorManager.getRotationMatrixFromVector(rotation, e.values)
+            Sensor.TYPE_ACCELEROMETER -> { gravity = e.values.clone(); if (!fusedFromAccelMag()) return }
+            Sensor.TYPE_MAGNETIC_FIELD -> { geomagnetic = e.values.clone(); if (!fusedFromAccelMag()) return }
+            else -> return
+        }
+        val heading = headingFromRotation()
+        compassDeg = if (compassDeg.isNaN()) heading else {
+            val diff = ((heading - compassDeg + 540) % 360) - 180
+            (compassDeg + diff * 0.2 + 360) % 360
+        }
+        if (!usingCompass() || shownLat.isNaN()) return
+        val now = SystemClock.elapsedRealtime()
+        if (now - lastCompassDraw < 66) return // ~15 fps is plenty
+        lastCompassDraw = now
+        if (animator?.isRunning == true) return
+        shownCourse = compassDeg
+        positionOverlay.courseDeg = compassDeg
+        moveCamera(shownLat, shownLon, compassDeg)
+        map.invalidate()
+    }
+
+    private fun fusedFromAccelMag(): Boolean {
+        val g = gravity ?: return false
+        val m = geomagnetic ?: return false
+        return SensorManager.getRotationMatrix(rotation, null, g, m)
+    }
+
+    /**
+     * Direction the phone faces, degrees from true north. Flat phone: the top edge of the screen.
+     * Upright (car mount): the back of the phone, i.e. the windscreen direction.
+     */
+    @Suppress("DEPRECATION")
+    private fun headingFromRotation(): Double {
+        val r = rotation // device axes in world (east, north, up) coordinates: columns X, Y, Z
+        val flat = abs(r[8]) > 0.75f
+        val (east, north) = if (flat) {
+            when (windowManager.defaultDisplay.rotation) {
+                Surface.ROTATION_90 -> -r[0] to -r[3]
+                Surface.ROTATION_180 -> -r[1] to -r[4]
+                Surface.ROTATION_270 -> r[0] to r[3]
+                else -> r[1] to r[4]
+            }
+        } else {
+            -r[2] to -r[5]
+        }
+        val magnetic = Math.toDegrees(atan2(east.toDouble(), north.toDouble()))
+        val decl = if (declination.isNaN()) 0f else declination
+        return (magnetic + decl + 720) % 360
+    }
+
+    private fun startCompass() {
+        val rv = sensors.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+        if (rv != null) {
+            sensors.registerListener(sensorListener, rv, SensorManager.SENSOR_DELAY_UI)
+        } else {
+            sensors.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let { sensors.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
+            sensors.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)?.let { sensors.registerListener(sensorListener, it, SensorManager.SENSOR_DELAY_UI) }
+        }
     }
 
     /** Glides the arrow (and map, when following) to the new fix over ~1 s, like a game camera. */
@@ -591,11 +689,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
         super.onResume()
         map.onResume()
         startUiLocation()
+        startCompass()
     }
 
     override fun onPause() {
         // UI GPS sleeps in background; RadarService keeps alerting.
         stopUiLocation()
+        sensors.unregisterListener(sensorListener)
         map.onPause()
         super.onPause()
     }
@@ -603,5 +703,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
     override fun onDestroy() {
         testAnnouncer?.shutdown()
         super.onDestroy()
+    }
+
+    companion object {
+        private const val GPS_COURSE_MIN_MPS = 1.5f
+        private const val COMPASS_BELOW_KMH = 8
+        private const val REFOLLOW_MS = 12_000L
     }
 }

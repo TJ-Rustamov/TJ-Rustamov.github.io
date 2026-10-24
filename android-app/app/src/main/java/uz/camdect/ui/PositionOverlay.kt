@@ -43,8 +43,8 @@ class PositionOverlay(private val density: Float) : Overlay() {
         }
         canvas.save()
         canvas.translate(x, y)
-        // osmdroid does not rotate the canvas; add the map rotation ourselves.
-        canvas.rotate((courseDeg + mapView.mapOrientation).toFloat())
+        // osmdroid has already rotated the canvas by the map orientation.
+        canvas.rotate(courseDeg.toFloat())
         canvas.scale(density * 1.2f, density * 1.2f)
         canvas.save()
         canvas.translate(1.5f, 2.5f)

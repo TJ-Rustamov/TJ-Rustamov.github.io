@@ -65,8 +65,9 @@ class CameraOverlay(
         val db = idx.db
         val proj = mapView.projection
         val r = 9 * density
-        // osmdroid 6 projects rotation itself; only the heading tick needs the map orientation.
-        val rotation = mapView.mapOrientation.toDouble()
+        // osmdroid draws overlays on a canvas already rotated by the map orientation:
+        // geometry needs no correction, text is counter-rotated to stay upright.
+        val rotation = mapView.mapOrientation
         showLabels = mapView.zoomLevelDouble >= LABEL_ZOOM
         for (k in 0 until visible.size) {
             val i = visible[k]
@@ -76,14 +77,16 @@ class CameraOverlay(
         }
     }
 
-    private fun drawCamera(canvas: Canvas, db: CameraDb, i: Int, x: Float, y: Float, r: Float, rotation: Double) {
+    private fun drawCamera(canvas: Canvas, db: CameraDb, i: Int, x: Float, y: Float, r: Float, rotation: Float) {
         if (i == highlighted) canvas.drawCircle(x, y, r * 2.2f, glow)
         // Tick showing the direction of traffic the camera watches.
-        val a = Math.toRadians(db.heading[i] + rotation)
+        val a = Math.toRadians(db.heading[i].toDouble())
         canvas.drawLine(x, y, x + (sin(a) * r * 2).toFloat(), y - (cos(a) * r * 2).toFloat(), dir)
         val limit = db.speedLimit[i].toInt()
         canvas.drawCircle(x, y, r, if (limit > 0) fill else fillNoLimit)
         canvas.drawCircle(x, y, r, ring)
+        canvas.save()
+        canvas.rotate(-rotation, x, y)
         if (limit > 0) canvas.drawText(limit.toString(), x, y + text.textSize / 3, text)
         if (showLabels) {
             val code = db.typeCode(i)
@@ -92,6 +95,7 @@ class CameraOverlay(
             canvas.drawText(name, x, ty, labelHalo)
             canvas.drawText(name, x, ty, label)
         }
+        canvas.restore()
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent, mapView: MapView): Boolean {
@@ -99,6 +103,7 @@ class CameraOverlay(
         if (tooFar) return false
         val db = idx.db
         val proj = mapView.projection
+        // MapView already un-rotates touch events, so they match toPixels() space.
         var best = -1
         var bestD = 24 * density
         for (k in 0 until visible.size) {
