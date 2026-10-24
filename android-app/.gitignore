@@ -1,0 +1,9 @@
+.gradle/
+build/
+local.properties
+.idea/
+*.iml
+captures/
+.kotlin/
+# Neoline database is proprietary: import it in the app instead of committing it.
+*.db

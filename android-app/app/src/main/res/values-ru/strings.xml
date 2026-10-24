@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="settings">Настройки</string>
+    <string name="start">Старт</string>
+    <string name="stop">Стоп</string>
+    <string name="center">Центр</string>
+    <string name="menu_import_db">Импорт базы камер</string>
+    <string name="menu_import_map">Импорт офлайн-карты (.mbtiles / .sqlite)</string>
+    <string name="menu_db_info">О базе</string>
+    <string name="db_loading">Загрузка базы камер…</string>
+    <string name="db_missing">База камер не загружена. Нажмите, чтобы импортировать X-COP_7500s_Baza_GPS.db</string>
+    <string name="db_error">Ошибка базы: %1$s</string>
+    <string name="db_loaded">База %1$s: %2$d точек</string>
+    <string name="db_import_failed">Ошибка импорта: %1$s</string>
+    <string name="map_imported">Офлайн-карта импортирована</string>
+    <string name="no_gps">Ожидание GPS…</string>
+    <string name="no_camera">Камер впереди нет</string>
+    <string name="kmh">км/ч</string>
+    <string name="camera_ahead">%1$s · %2$d м</string>
+    <string name="limit">огр. %1$d</string>
+    <string name="zoom_in_hint">Приблизьте карту, чтобы увидеть камеры</string>
+    <string name="perm_location_needed">Для предупреждений о камерах нужен доступ к местоположению.</string>
+    <string name="battery_title">Работа в фоне</string>
+    <string name="battery_msg">Чтобы предупреждения работали при выключенном экране, разрешите CamDect игнорировать оптимизацию батареи.</string>
+    <string name="allow">Разрешить</string>
+    <string name="later">Позже</string>
+    <string name="notif_channel_drive">Режим поездки</string>
+    <string name="notif_channel_alert">Предупреждения о камерах</string>
+    <string name="notif_running">Слежу за камерами</string>
+    <string name="notif_stop">Стоп</string>
+    <string name="camera_info">%1$s\nНаправление %2$d°, код типа %3$d</string>
+
+    <string name="tts_camera">Камера через %1$d метров</string>
+    <string name="tts_camera_limit">Камера через %1$d метров, ограничение %2$d</string>
+    <string name="tts_control">Контроль через %1$d метров</string>
+    <string name="tts_slow_down">Снизьте скорость</string>
+
+    <string name="pref_cat_alerts">Предупреждения</string>
+    <string name="pref_voice">Голосовые предупреждения</string>
+    <string name="pref_voice_lang">Язык голоса</string>
+    <string name="pref_beep">Звуковой сигнал</string>
+    <string name="pref_vibrate">Вибрация</string>
+    <string name="pref_min_distance">Минимальная дистанция предупреждения</string>
+    <string name="pref_overspeed">Допустимое превышение</string>
+    <string name="pref_ignore_no_limit">Игнорировать точки без ограничения скорости</string>
+    <string name="pref_cat_map">Карта</string>
+    <string name="pref_keep_screen">Не выключать экран в поездке</string>
+    <string name="pref_rotate">Поворачивать карту по направлению движения</string>
+    <string name="pref_cat_db">База</string>
+    <string name="pref_db_info">База камер</string>
+</resources>

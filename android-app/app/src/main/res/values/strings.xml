@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CamDect</string>
+    <string name="settings">Settings</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
+    <string name="center">Center</string>
+    <string name="menu_import_db">Import camera database</string>
+    <string name="menu_import_map">Import offline map (.mbtiles / .sqlite)</string>
+    <string name="menu_db_info">Database info</string>
+    <string name="db_loading">Loading camera database…</string>
+    <string name="db_missing">No camera database yet. Tap to import X-COP_7500s_Baza_GPS.db</string>
+    <string name="db_error">Database error: %1$s</string>
+    <string name="db_loaded">Database %1$s: %2$d points</string>
+    <string name="db_import_failed">Import failed: %1$s</string>
+    <string name="map_imported">Offline map imported</string>
+    <string name="no_gps">Waiting for GPS…</string>
+    <string name="no_camera">No cameras ahead</string>
+    <string name="speed_kmh">%1$d</string>
+    <string name="kmh">km/h</string>
+    <string name="camera_ahead">%1$s · %2$d m</string>
+    <string name="limit">limit %1$d</string>
+    <string name="zoom_in_hint">Zoom in to see cameras</string>
+    <string name="perm_location_needed">Location permission is needed to warn about cameras.</string>
+    <string name="battery_title">Keep running in background</string>
+    <string name="battery_msg">To keep alerts working with the screen off, allow CamDect to ignore battery optimization.</string>
+    <string name="allow">Allow</string>
+    <string name="later">Later</string>
+    <string name="notif_channel_drive">Drive mode</string>
+    <string name="notif_channel_alert">Camera alerts</string>
+    <string name="notif_running">Watching for cameras</string>
+    <string name="notif_stop">Stop</string>
+    <string name="camera_info">%1$s\nHeading %2$d°, type code %3$d</string>
+
+    <!-- Spoken phrases -->
+    <string name="tts_camera">Camera in %1$d metres</string>
+    <string name="tts_camera_limit">Camera in %1$d metres, limit %2$d</string>
+    <string name="tts_control">Control point in %1$d metres</string>
+    <string name="tts_slow_down">Slow down</string>
+
+    <!-- Settings -->
+    <string name="pref_cat_alerts">Alerts</string>
+    <string name="pref_voice">Voice alerts</string>
+    <string name="pref_voice_lang">Voice language</string>
+    <string name="pref_beep">Beep</string>
+    <string name="pref_vibrate">Vibrate</string>
+    <string name="pref_min_distance">Minimum alert distance</string>
+    <string name="pref_overspeed">Overspeed margin</string>
+    <string name="pref_ignore_no_limit">Ignore points without speed limit</string>
+    <string name="pref_cat_map">Map</string>
+    <string name="pref_keep_screen">Keep screen on while driving</string>
+    <string name="pref_rotate">Rotate map to direction of travel</string>
+    <string name="pref_cat_db">Database</string>
+    <string name="pref_db_info">Camera database</string>
+
+    <string-array name="lang_entries">
+        <item>System</item>
+        <item>Русский</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="lang_values" translatable="false">
+        <item>system</item>
+        <item>ru</item>
+        <item>en</item>
+    </string-array>
+    <string-array name="distance_entries">
+        <item>300 m</item>
+        <item>400 m</item>
+        <item>600 m</item>
+        <item>800 m</item>
+    </string-array>
+    <string-array name="distance_values" translatable="false">
+        <item>300</item>
+        <item>400</item>
+        <item>600</item>
+        <item>800</item>
+    </string-array>
+    <string-array name="margin_entries">
+        <item>0 km/h</item>
+        <item>+5 km/h</item>
+        <item>+10 km/h</item>
+        <item>+20 km/h</item>
+    </string-array>
+    <string-array name="margin_values" translatable="false">
+        <item>0</item>
+        <item>5</item>
+        <item>10</item>
+        <item>20</item>
+    </string-array>
+</resources>
