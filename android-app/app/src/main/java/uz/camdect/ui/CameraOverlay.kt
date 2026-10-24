@@ -24,6 +24,8 @@ class CameraOverlay(
 ) : Overlay() {
     var index: CameraIndex? = null
     var highlighted: Int = -1
+    /** User names per type code (e.g. 237 -> "Lochin"), drawn under markers when zoomed in. */
+    var typeNames: Map<Int, String> = emptyMap()
     /** True when zoomed out too far to draw individual cameras. */
     var tooFar = false
         private set
@@ -43,6 +45,14 @@ class CameraOverlay(
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFFFFFFFF.toInt(); textAlign = Paint.Align.CENTER; textSize = 10 * density; isFakeBoldText = true
     }
+    private val label = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xFF1E2A38.toInt(); textAlign = Paint.Align.CENTER; textSize = 10 * density; isFakeBoldText = true
+    }
+    private val labelHalo = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = 0xDDFFFFFF.toInt(); textAlign = Paint.Align.CENTER; textSize = 10 * density; isFakeBoldText = true
+        style = Paint.Style.STROKE; strokeWidth = 3 * density
+    }
+    private var showLabels = false
     private val glow = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x66FFEB3B }
 
     override fun draw(canvas: Canvas, mapView: MapView, shadow: Boolean) {
@@ -57,6 +67,7 @@ class CameraOverlay(
         val r = 9 * density
         // osmdroid 6 projects rotation itself; only the heading tick needs the map orientation.
         val rotation = mapView.mapOrientation.toDouble()
+        showLabels = mapView.zoomLevelDouble >= LABEL_ZOOM
         for (k in 0 until visible.size) {
             val i = visible[k]
             geo.setCoords(db.latDeg(i), db.lonDeg(i))
@@ -74,6 +85,13 @@ class CameraOverlay(
         canvas.drawCircle(x, y, r, if (limit > 0) fill else fillNoLimit)
         canvas.drawCircle(x, y, r, ring)
         if (limit > 0) canvas.drawText(limit.toString(), x, y + text.textSize / 3, text)
+        if (showLabels) {
+            val code = db.typeCode(i)
+            val name = typeNames[code] ?: "#$code"
+            val ty = y + r + label.textSize * 1.1f
+            canvas.drawText(name, x, ty, labelHalo)
+            canvas.drawText(name, x, ty, label)
+        }
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent, mapView: MapView): Boolean {
@@ -96,6 +114,7 @@ class CameraOverlay(
 
     companion object {
         const val MIN_ZOOM = 11.0
+        private const val LABEL_ZOOM = 15.0
         private const val MAX_DRAWN = 2500
     }
 }

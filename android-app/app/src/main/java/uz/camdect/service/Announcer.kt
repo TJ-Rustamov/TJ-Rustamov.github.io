@@ -14,6 +14,7 @@ import android.speech.tts.UtteranceProgressListener
 import uz.camdect.R
 import uz.camdect.core.AlertEngine
 import uz.camdect.data.Prefs
+import uz.camdect.data.TypeLabels
 import java.util.Locale
 
 /** Speaks / beeps / vibrates alerts. Uses the phone's offline TTS engine. */
@@ -33,7 +34,10 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         ttsLang = prefs.voiceLang
         tts = TextToSpeech(context) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
-            if (ttsReady) configureTts()
+            if (ttsReady) {
+                configureTts()
+                if (pendingTest) { pendingTest = false; speak(voiceStrings().getString(R.string.tts_test)) }
+            } else DriveState.log("Voice engine failed to start ($status)")
         }
     }
 
@@ -41,6 +45,7 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         val t = tts ?: return
         val locale = locale()
         if (t.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) t.language = locale
+        else DriveState.log("Voice: ${locale.displayLanguage} not installed, using ${t.voice?.locale?.displayLanguage ?: "default"}")
         t.setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
@@ -67,7 +72,7 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         return context.createConfigurationContext(conf)
     }
 
-    fun announce(event: AlertEngine.Event) {
+    fun announce(event: AlertEngine.Event, db: uz.camdect.core.CameraDb) {
         if (prefs.voiceLang != ttsLang) {
             tts?.shutdown()
             initTts()
@@ -78,14 +83,28 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         if (prefs.voice) {
             val metres = roundDistance(t.distanceM)
             val s = voiceStrings()
+            val name = TypeLabels.custom(context, db.typeCode(t.camera))
+            val withLimit = t.speedLimitKmh > 0 && event.firstForCamera
             val text = when {
-                t.speedLimitKmh > 0 && event.firstForCamera -> s.getString(R.string.tts_camera_limit, metres, t.speedLimitKmh)
+                name != null && withLimit -> s.getString(R.string.tts_named_limit, name, metres, t.speedLimitKmh)
+                name != null -> s.getString(R.string.tts_named, name, metres)
+                withLimit -> s.getString(R.string.tts_camera_limit, metres, t.speedLimitKmh)
                 t.speedLimitKmh > 0 -> s.getString(R.string.tts_camera, metres)
                 else -> s.getString(R.string.tts_control, metres)
             }
             speak(text)
         }
     }
+
+    /** Plays a sample alert so the user can check volume and voice. */
+    fun test() {
+        beep(1)
+        vibrate()
+        if (ttsReady) speak(voiceStrings().getString(R.string.tts_test))
+        else pendingTest = true
+    }
+
+    private var pendingTest = false
 
     fun overspeed() {
         if (prefs.beep) beep(3)

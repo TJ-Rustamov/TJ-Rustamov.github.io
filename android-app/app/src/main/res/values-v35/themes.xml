@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Android 15 forces edge-to-edge; the plain settings list does not need it. -->
+    <style name="Theme.CamDect.Settings" parent="Theme.CamDect">
+        <item name="android:windowOptOutEdgeToEdgeEnforcement">true</item>
+    </style>
+</resources>

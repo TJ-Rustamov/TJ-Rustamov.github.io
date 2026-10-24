@@ -14,7 +14,6 @@ class Prefs(context: Context) {
     val beep get() = sp.getBoolean("beep", true)
     val vibrate get() = sp.getBoolean("vibrate", true)
     val keepScreenOn get() = sp.getBoolean("keep_screen_on", true)
-    val rotateMap get() = sp.getBoolean("rotate_map", false)
     var batteryAsked: Boolean
         get() = sp.getBoolean("battery_asked", false)
         set(v) = sp.edit().putBoolean("battery_asked", v).apply()

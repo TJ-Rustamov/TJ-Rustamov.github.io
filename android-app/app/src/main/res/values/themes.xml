@@ -5,4 +5,13 @@
         <item name="colorPrimaryDark">@color/primary</item>
         <item name="colorAccent">@color/accent</item>
     </style>
+
+    <!-- Map screen: full-bleed map, controls are inset manually. -->
+    <style name="Theme.CamDect.Map" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="colorPrimary">@color/primary</item>
+        <item name="colorPrimaryDark">@color/primary</item>
+        <item name="colorAccent">@color/accent</item>
+    </style>
+
+    <style name="Theme.CamDect.Settings" parent="Theme.CamDect" />
 </resources>

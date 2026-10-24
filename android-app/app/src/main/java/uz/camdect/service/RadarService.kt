@@ -25,9 +25,9 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import uz.camdect.R
 import uz.camdect.core.AlertEngine
-import uz.camdect.core.CameraTypes
 import uz.camdect.data.CameraRepository
 import uz.camdect.data.Prefs
+import uz.camdect.data.TypeLabels
 import uz.camdect.ui.MainActivity
 
 /**
@@ -43,6 +43,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
     private var wakeLock: PowerManager.WakeLock? = null
     private var lastNotifText: String? = null
     private var lastOverspeedWarn = 0L
+    private var gotFix = false
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -64,10 +65,15 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
             if (Build.VERSION.SDK_INT >= 29) ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION else 0,
         )
         if (!startLocation()) {
+            DriveState.log("Cannot start: no precise location permission")
             stopSelf()
             return START_NOT_STICKY
         }
         acquireWakeLock()
+        if (!DriveState.flow.value.running) DriveState.log(
+            "Alerts started" + (CameraRepository.ready?.let { ", ${it.db.size} cameras" } ?: ", NO DATABASE")
+        )
+        gotFix = false
         DriveState.mutable.value = DriveState.Snapshot(running = true)
         return START_STICKY
     }
@@ -92,6 +98,10 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
 
     override fun onLocationChanged(location: Location) {
         val ready = CameraRepository.ready
+        if (!gotFix) {
+            gotFix = true
+            DriveState.log("First GPS fix ±${location.accuracy.toInt()} m")
+        }
         val speedMps = if (location.hasSpeed()) location.speed.toDouble() else 0.0
         val course = if (location.hasBearing()) location.bearing.toDouble() else Double.NaN
 
@@ -103,24 +113,32 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
             }
             val result = engine!!.update(location.latitude, location.longitude, speedMps, course)
             target = result.target
-            for (e in result.events) announcer.announce(e)
+            for (e in result.events) {
+                announcer.announce(e, ready.db)
+                val c = e.target.camera
+                DriveState.log(
+                    "${TypeLabels.label(this, ready.db, c)} ${e.target.level} ${e.target.distanceM.toInt()} m, " +
+                        "limit ${e.target.speedLimitKmh}, you ${result.speedKmh} km/h"
+                )
+            }
             val now = System.currentTimeMillis()
             if (target != null && target.overspeed && result.events.isEmpty() && now - lastOverspeedWarn > OVERSPEED_REPEAT_MS) {
                 lastOverspeedWarn = now
                 announcer.overspeed()
+                DriveState.log("Overspeed: ${result.speedKmh} km/h, limit ${target.speedLimitKmh}")
             }
             updateNotification(target, ready)
         }
         DriveState.mutable.value = DriveState.Snapshot(
             running = true, hasFix = true,
             lat = location.latitude, lon = location.longitude,
-            speedKmh = (speedMps * 3.6).toInt(), courseDeg = course, target = target,
+            speedKmh = (speedMps * 3.6).toInt(), courseDeg = course, accuracyM = location.accuracy.toInt(), target = target,
         )
     }
 
     private fun updateNotification(target: AlertEngine.Target?, ready: CameraRepository.State.Ready) {
         val text = if (target == null) getString(R.string.notif_running)
-        else getString(R.string.camera_ahead, CameraTypes.label(ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
+        else getString(R.string.camera_ahead, TypeLabels.label(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
         if (text == lastNotifText) return
         lastNotifText = text
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -175,14 +193,15 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
         announcer.shutdown()
         wakeLock?.let { if (it.isHeld) it.release() }
         DriveState.mutable.value = DriveState.Snapshot(running = false)
+        DriveState.log("Alerts stopped")
         super.onDestroy()
     }
 
     // Required on API < 29 where these are abstract.
     @Deprecated("Deprecated in Java")
     override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
-    override fun onProviderEnabled(provider: String) {}
-    override fun onProviderDisabled(provider: String) {}
+    override fun onProviderEnabled(provider: String) = DriveState.log("GPS turned on")
+    override fun onProviderDisabled(provider: String) = DriveState.log("GPS turned OFF in phone settings")
 
     companion object {
         private const val NOTIF_ID = 1

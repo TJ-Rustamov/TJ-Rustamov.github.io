@@ -32,6 +32,32 @@
     <string name="notif_stop">Stop</string>
     <string name="camera_info">%1$s\nHeading %2$d°, type code %3$d</string>
 
+    <string name="menu">Menu</string>
+    <string name="compass">Map orientation</string>
+    <string name="menu_test_alert">Test alert sound</string>
+    <string name="menu_log">Alert log</string>
+    <string name="mode_heading">Heading up</string>
+    <string name="mode_north">North up</string>
+    <string name="mode_free">Free</string>
+    <string name="type_camera">Camera #%1$d</string>
+    <string name="type_control">Control #%1$d</string>
+    <string name="gps_accuracy">GPS ±%1$d m · %2$s</string>
+    <string name="service_off">Alerts off: tap Start</string>
+    <string name="service_on">Alerts on</string>
+    <string name="log_empty">Nothing logged yet.</string>
+    <string name="type_dialog_msg">Type code %1$d (%2$d points in database)
+Speed limit: %3$s
+Watches traffic heading %4$d°
+
+Name this camera type (e.g. Lochin, Peshexod). The name is used for every camera with code %1$d, on screen and by voice.</string>
+    <string name="no_limit">none</string>
+    <string name="save">Save</string>
+    <string name="reset">Reset</string>
+    <string name="cancel">Cancel</string>
+    <string name="tts_test">Camera in 400 metres, limit 60</string>
+    <string name="tts_named">%1$s in %2$d metres</string>
+    <string name="tts_named_limit">%1$s in %2$d metres, limit %3$d</string>
+
     <!-- Spoken phrases -->
     <string name="tts_camera">Camera in %1$d metres</string>
     <string name="tts_camera_limit">Camera in %1$d metres, limit %2$d</string>
@@ -49,7 +75,6 @@
     <string name="pref_ignore_no_limit">Ignore points without speed limit</string>
     <string name="pref_cat_map">Map</string>
     <string name="pref_keep_screen">Keep screen on while driving</string>
-    <string name="pref_rotate">Rotate map to direction of travel</string>
     <string name="pref_cat_db">Database</string>
     <string name="pref_db_info">Camera database</string>
 

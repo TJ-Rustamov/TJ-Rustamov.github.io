@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action_test_alert" android:title="@string/menu_test_alert" />
+    <item android:id="@+id/action_log" android:title="@string/menu_log" />
     <item android:id="@+id/action_import_db" android:title="@string/menu_import_db" />
     <item android:id="@+id/action_import_map" android:title="@string/menu_import_map" />
     <item android:id="@+id/action_db_info" android:title="@string/menu_db_info" />

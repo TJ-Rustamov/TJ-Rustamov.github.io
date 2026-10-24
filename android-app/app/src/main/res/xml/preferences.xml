@@ -15,7 +15,6 @@
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/pref_cat_map" app:iconSpaceReserved="false">
         <SwitchPreferenceCompat app:key="keep_screen_on" app:title="@string/pref_keep_screen" app:defaultValue="true" app:iconSpaceReserved="false" />
-        <SwitchPreferenceCompat app:key="rotate_map" app:title="@string/pref_rotate" app:defaultValue="false" app:iconSpaceReserved="false" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/pref_cat_db" app:iconSpaceReserved="false">
         <Preference app:key="db_info" app:title="@string/pref_db_info" app:selectable="false" app:iconSpaceReserved="false" />
