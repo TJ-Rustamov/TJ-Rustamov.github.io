@@ -13,6 +13,12 @@ object TypeLabels {
         236 to "Cordon PRO",
         238 to "Skat",
         168 to "Strelka",
+        230 to "AutoUragan",
+        164 to "Arena",
+        224 to "Binar",
+        151 to "Kris-P",
+        232 to "Integra",
+        239 to "Police post",
         233 to "Hikvision",
         165 to "MultaRadar CD",
     )
