@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from one table so every language has every string. -->
 <resources>
     <string name="app_name">CamDect</string>
     <string name="settings">Settings</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="center">Center</string>
+    <string name="cancel">Cancel</string>
+    <string name="menu">Menu</string>
     <string name="menu_import_db">Import camera database</string>
-    <string name="menu_import_map">Import offline map (.mbtiles / .sqlite)</string>
     <string name="menu_db_info">Database info</string>
+    <string name="menu_offline">Offline maps</string>
+    <string name="menu_test_alert">Test alert sound</string>
+    <string name="menu_log">Alert log</string>
     <string name="db_loading">Loading camera database…</string>
     <string name="db_missing">No camera database yet. Tap to import X-COP_7500s_Baza_GPS.db</string>
     <string name="db_error">Database error: %1$s</string>
     <string name="db_loaded">Database %1$s: %2$d points</string>
     <string name="db_import_failed">Import failed: %1$s</string>
-    <string name="map_imported">Offline map imported</string>
     <string name="no_gps">Waiting for GPS…</string>
     <string name="no_camera">No cameras ahead</string>
-    <string name="speed_kmh">%1$d</string>
     <string name="kmh">km/h</string>
     <string name="camera_ahead">%1$s · %2$d m</string>
-    <string name="limit">limit %1$d</string>
+    <string name="opposite_ahead">%1$s · %2$d m · for the other direction</string>
     <string name="zoom_in_hint">Zoom in to see cameras</string>
     <string name="perm_location_needed">Location permission is needed to warn about cameras.</string>
     <string name="battery_title">Keep running in background</string>
@@ -30,12 +33,7 @@
     <string name="notif_channel_alert">Camera alerts</string>
     <string name="notif_running">Watching for cameras</string>
     <string name="notif_stop">Stop</string>
-    <string name="camera_info">%1$s\nHeading %2$d°, type code %3$d</string>
-
-    <string name="menu">Menu</string>
     <string name="compass">Map orientation</string>
-    <string name="menu_test_alert">Test alert sound</string>
-    <string name="menu_log">Alert log</string>
     <string name="mode_heading">Heading up</string>
     <string name="mode_north">North up</string>
     <string name="mode_free">Free</string>
@@ -48,16 +46,6 @@
     <string name="type_dialog_msg">Speed limit: %1$s\nChecks cars going %2$s (%3$d°)\nSees them from %4$s\nDanger area: %5$d m ahead of the lens\n\nType code %6$d (%7$d points in database)</string>
     <string name="seen_front">the front</string>
     <string name="seen_rear">behind</string>
-    <string-array name="compass_words">
-        <item>north ↑</item>
-        <item>northeast ↗</item>
-        <item>east →</item>
-        <item>southeast ↘</item>
-        <item>south ↓</item>
-        <item>southwest ↙</item>
-        <item>west ←</item>
-        <item>northwest ↖</item>
-    </string-array>
     <string name="control_red_light">red light</string>
     <string name="control_crosswalk">pedestrian crossing</string>
     <string name="control_no_stopping">no stopping</string>
@@ -68,14 +56,12 @@
     <string name="tts_test">Camera in 400 metres, limit 60</string>
     <string name="tts_named">%1$s in %2$d metres</string>
     <string name="tts_named_limit">%1$s in %2$d metres, limit %3$d</string>
-
-    <!-- Spoken phrases -->
     <string name="tts_camera">Camera in %1$d metres</string>
     <string name="tts_camera_limit">Camera in %1$d metres, limit %2$d</string>
     <string name="tts_control">Control point in %1$d metres</string>
     <string name="tts_slow_down">Slow down</string>
-
-    <!-- Settings -->
+    <string name="pref_cat_general">General</string>
+    <string name="pref_app_lang">Language</string>
     <string name="pref_cat_alerts">Alerts</string>
     <string name="pref_voice">Voice alerts</string>
     <string name="pref_voice_lang">Voice language</string>
@@ -88,16 +74,66 @@
     <string name="pref_keep_screen">Keep screen on while driving</string>
     <string name="pref_cat_db">Database</string>
     <string name="pref_db_info">Camera database</string>
-
-    <string-array name="lang_entries">
-        <item>System</item>
+    <string name="tab_map">Map</string>
+    <string name="tab_info">Camera info</string>
+    <string name="info_header">Camera types</string>
+    <string name="info_controls_header">What else cameras check</string>
+    <string name="info_points">%1$d points in database</string>
+    <string name="info_other">Other cameras are shown as \"Camera #code\" and still give alerts.</string>
+    <string name="offline_msg">Downloaded areas: %1$d\n\nDownload the area on screen for offline use? About %2$d MB.</string>
+    <string name="offline_download">Download</string>
+    <string name="offline_delete">Delete all</string>
+    <string name="offline_progress">Downloading map… %1$d%%</string>
+    <string name="offline_done">Map area saved for offline use</string>
+    <string name="offline_deleted">Deleted areas: %1$d</string>
+    <string name="offline_failed">Download failed: %1$s</string>
+    <string name="offline_too_big">This area is too large. Zoom in to a city or region first.</string>
+    <string name="no_gl">This phone\'s graphics are too old to show the map. Camera alerts still work.</string>
+    <string name="map_no_internet">Map not loaded yet: connect to the internet once or download an area. Alerts work offline.</string>
+    <string name="cam_165">MultaRadar CD</string>
+    <string name="desc_165">Low-power mobile tripod radar built to slip past radar detectors; catches speeding.</string>
+    <string name="cam_168">Strelka</string>
+    <string name="desc_168">Long-range pulse radar tracking many cars across several lanes; speeding and lane violations.</string>
+    <string name="cam_237">Lochin</string>
+    <string name="desc_237">AI video analytics with radar: speeding, seat belts and phone use.</string>
+    <string name="cam_243">AutoCon (ambush)</string>
+    <string name="desc_243">Smart mobile or fixed complex, often set up as an ambush: lanes, red lights, registration and exact speed.</string>
+    <string name="cam_236">Cordon PRO</string>
+    <string name="desc_236">Low-emission radar aimed down at the road, on gantries or tripods; detectors notice it late.</string>
+    <string name="cam_238">Skat</string>
+    <string name="desc_238">Multi-lane, multi-target radar with flat antennas, often hidden behind barriers on highways.</string>
+    <string name="cam_233">Hikvision</string>
+    <string name="desc_233">City intersection monitor: narrow-beam radar with HD cameras, from speeding to illegal turns.</string>
+    <string name="cam_230">AutoUragan</string>
+    <string name="desc_230">Heavy-duty fixed camera on city gantries: plate recognition and exact speed.</string>
+    <string name="cam_164">Arena</string>
+    <string name="desc_164">Older but reliable photo-radar box; photographs cars from the front only.</string>
+    <string name="cam_224">Binar</string>
+    <string name="desc_224">Handheld or car-mounted radar used by patrol officers.</string>
+    <string name="cam_151">Kris-P</string>
+    <string name="desc_151">Mobile tripod that measures speed lane by lane.</string>
+    <string name="cam_232">Integra</string>
+    <string name="desc_232">Hardware-software system checking intersections and speed on city streets.</string>
+    <string name="cam_239">Police post</string>
+    <string name="desc_239">Permanent police checkpoint, weight control or border post.</string>
+    <string name="desc_red_light">Camera at an intersection: checks running a red light.</string>
+    <string name="desc_crosswalk">Checks that drivers give way to pedestrians at a crossing.</string>
+    <string name="desc_no_stopping">Checks stopping or parking where it is forbidden.</string>
+    <string-array name="compass_words">
+        <item>north ↑</item>
+        <item>northeast ↗</item>
+        <item>east →</item>
+        <item>southeast ↘</item>
+        <item>south ↓</item>
+        <item>southwest ↙</item>
+        <item>west ←</item>
+        <item>northwest ↖</item>
+    </string-array>
+    <string-array name="voice_lang_entries">
+        <item>Same as app</item>
+        <item>O\'zbekcha</item>
         <item>Русский</item>
         <item>English</item>
-    </string-array>
-    <string-array name="lang_values" translatable="false">
-        <item>system</item>
-        <item>ru</item>
-        <item>en</item>
     </string-array>
     <string-array name="distance_entries">
         <item>300 m</item>
@@ -105,17 +141,35 @@
         <item>600 m</item>
         <item>800 m</item>
     </string-array>
-    <string-array name="distance_values" translatable="false">
-        <item>300</item>
-        <item>400</item>
-        <item>600</item>
-        <item>800</item>
-    </string-array>
     <string-array name="margin_entries">
         <item>0 km/h</item>
         <item>+5 km/h</item>
         <item>+10 km/h</item>
         <item>+20 km/h</item>
+    </string-array>
+    <string-array name="app_lang_entries" translatable="false">
+        <item>O\'zbekcha (lotin)</item>
+        <item>Ўзбекча (кирилл)</item>
+        <item>Русский</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="app_lang_values" translatable="false">
+        <item>uz</item>
+        <item>uz-Cyrl</item>
+        <item>ru</item>
+        <item>en</item>
+    </string-array>
+    <string-array name="voice_lang_values" translatable="false">
+        <item>app</item>
+        <item>uz</item>
+        <item>ru</item>
+        <item>en</item>
+    </string-array>
+    <string-array name="distance_values" translatable="false">
+        <item>300</item>
+        <item>400</item>
+        <item>600</item>
+        <item>800</item>
     </string-array>
     <string-array name="margin_values" translatable="false">
         <item>0</item>

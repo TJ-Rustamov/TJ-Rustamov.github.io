@@ -78,6 +78,7 @@ object CameraRepository {
 
     private fun build(bytes: ByteArray): State.Ready {
         val db = NeolineDbParser.parse(bytes)
+        TypeLabels.prepareCounts(db) // off the UI thread, for the camera info tab and dialog
         return State.Ready(db, CameraIndex(db))
     }
 }

@@ -6,4 +6,8 @@
     <color name="panel_text">#FFFFFF</color>
     <color name="alert">#E53935</color>
     <color name="warn">#FB8C00</color>
+    <color name="info_bg">#F5F7F9</color>
+    <color name="info_text">#1E2A38</color>
+    <color name="info_sub">#5F6B78</color>
+    <color name="tab_active">#E53935</color>
 </resources>

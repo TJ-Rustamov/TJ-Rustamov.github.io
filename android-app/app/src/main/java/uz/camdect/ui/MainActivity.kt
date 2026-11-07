@@ -2,6 +2,7 @@ package uz.camdect.ui
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.ActivityManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -20,20 +21,23 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Looper
 import android.os.PowerManager
-import android.provider.Settings
 import android.os.SystemClock
+import android.provider.Settings
 import android.view.Choreographer
-import android.view.MotionEvent
+import android.view.Gravity
 import android.view.Surface
 import android.view.View
-import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.ImageButton
+import android.widget.LinearLayout
 import android.widget.PopupMenu
+import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -45,30 +49,20 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.osmdroid.config.Configuration
-import org.osmdroid.events.MapListener
-import org.osmdroid.events.ScrollEvent
-import org.osmdroid.events.ZoomEvent
-import org.osmdroid.tileprovider.tilesource.TileSourceFactory
-import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
-import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.gestures.RotationGestureOverlay
+import org.maplibre.android.maps.MapView
 import uz.camdect.R
+import uz.camdect.core.Geo
 import uz.camdect.core.HeadingFilter
+import uz.camdect.data.AppLanguage
 import uz.camdect.data.CameraRepository
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
 import uz.camdect.service.Announcer
 import uz.camdect.service.DriveState
 import uz.camdect.service.RadarService
-import java.io.File
 import kotlin.math.abs
 import kotlin.math.atan2
-import kotlin.math.hypot
 
 class MainActivity : AppCompatActivity(), LocationListener {
 
@@ -76,7 +70,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private enum class ViewMode { HEADING_UP, NORTH_UP, FREE }
 
     private lateinit var prefs: Prefs
-    private lateinit var map: MapView
+    private var mapView: MapView? = null
+    private var mapController: MapController? = null
     private lateinit var speedView: TextView
     private lateinit var statusView: TextView
     private lateinit var subStatusView: TextView
@@ -85,14 +80,17 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var modeLabel: TextView
     private lateinit var compass: ImageButton
     private lateinit var driveButton: Button
-    private lateinit var cameraOverlay: CameraOverlay
-    private lateinit var positionOverlay: PositionOverlay
+    private lateinit var infoScroll: ScrollView
+    private lateinit var infoList: LinearLayout
+    private lateinit var tabMap: TextView
+    private lateinit var tabInfo: TextView
 
     private var repoState: CameraRepository.State = CameraRepository.State.Loading
     private var startAfterPermission = false
 
     private var mode = ViewMode.HEADING_UP
     private var followMode = ViewMode.HEADING_UP
+    private var infoTabShown = false
 
     // Latest fix from our own GPS listener (UI only; alerts come from RadarService).
     private var fix: Location? = null
@@ -102,9 +100,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var shownLat = Double.NaN
     private var shownLon = Double.NaN
     private var shownCourse = Double.NaN
-
-    private var touchX = 0f
-    private var touchY = 0f
+    private var snapCamera = true
     private var lastTouchAt = 0L
 
     // Heading: gyro for instant turns, GPS/compass to correct drift (see HeadingFilter).
@@ -135,7 +131,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
             Choreographer.getInstance().postFrameCallback(this)
         }
     }
-    private val touchSlop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
 
     private val requestPermissions =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -151,12 +146,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (uri != null) importDb(uri)
     }
 
-    private val pickMap = registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-        if (uri != null) importMap(uri)
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        AppLanguage.applySaved(this) // recreates once if the saved language is not active yet
         prefs = Prefs(this)
         sensors = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         setupEdgeToEdge()
@@ -169,12 +161,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
         modeLabel = findViewById(R.id.mode_label)
         compass = findViewById(R.id.btn_compass)
         driveButton = findViewById(R.id.btn_drive)
-        map = findViewById(R.id.map)
+        infoScroll = findViewById(R.id.info_scroll)
+        infoList = findViewById(R.id.info_list)
+        tabMap = findViewById(R.id.tab_map)
+        tabInfo = findViewById(R.id.tab_info)
         applyInsets()
 
         followMode = if (prefs.sp.getString("follow_mode", "heading") == "north") ViewMode.NORTH_UP else ViewMode.HEADING_UP
         mode = followMode
-        setupMap()
+        setupMap(savedInstanceState)
 
         statusView.setOnClickListener { if (repoState is CameraRepository.State.Missing) pickDb.launch(arrayOf("*/*")) }
         driveButton.setOnClickListener {
@@ -183,7 +178,15 @@ class MainActivity : AppCompatActivity(), LocationListener {
         findViewById<Button>(R.id.btn_center).setOnClickListener { setMode(followMode) }
         compass.setOnClickListener { onCompassTap() }
         findViewById<ImageButton>(R.id.btn_menu).setOnClickListener { showMenu(it) }
+        tabMap.setOnClickListener { showInfoTab(false) }
+        tabInfo.setOnClickListener { showInfoTab(true) }
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                if (infoTabShown) showInfoTab(false) else { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
+            }
+        })
         updateModeUi()
+        showInfoTab(false)
 
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -195,77 +198,99 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (!hasLocationPermission()) ensurePermissionsAndStart(startService = false)
     }
 
-    // --- Layout / insets ---
+    // --- Layout / insets / tabs ---
 
     @Suppress("DEPRECATION")
     private fun setupEdgeToEdge() {
         // Same look on every Android version: map under transparent system bars.
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.TRANSPARENT
-        window.navigationBarColor = 0x66000000
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.primary)
         WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = true
     }
 
     private fun applyInsets() {
         val top = findViewById<View>(R.id.top_area)
         val bottom = findViewById<View>(R.id.bottom_area)
+        val density = resources.displayMetrics.density
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.root)) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout())
             (top.layoutParams as ViewGroup.MarginLayoutParams).apply {
                 topMargin = bars.top; leftMargin = bars.left; rightMargin = bars.right
             }
-            (bottom.layoutParams as ViewGroup.MarginLayoutParams).apply {
-                bottomMargin = bars.bottom; leftMargin = bars.left; rightMargin = bars.right
-            }
+            bottom.setPadding(bars.left, 0, bars.right, bars.bottom)
+            // Info list scrolls between the status bar and the tab bar.
+            val pad = (16 * density).toInt()
+            infoList.setPadding(pad, bars.top + pad, pad, bars.bottom + (64 * density).toInt())
             top.requestLayout()
-            bottom.requestLayout()
             insets
         }
     }
 
+    private fun showInfoTab(show: Boolean) {
+        infoTabShown = show
+        infoScroll.visibility = if (show) View.VISIBLE else View.GONE
+        val mapUi = if (show) View.GONE else View.VISIBLE
+        findViewById<View>(R.id.top_area).visibility = mapUi
+        findViewById<View>(R.id.drive_buttons).visibility = mapUi
+        if (show) {
+            hintView.visibility = View.GONE
+            CameraInfoView.fill(infoList, CameraRepository.ready?.db)
+            infoScroll.scrollTo(0, 0)
+        } else {
+            onMapMoved()
+        }
+        val active = ContextCompat.getColor(this, R.color.tab_active)
+        val idle = ContextCompat.getColor(this, R.color.panel_text)
+        tabMap.setTextColor(if (show) idle else active)
+        tabInfo.setTextColor(if (show) active else idle)
+    }
+
     // --- Map ---
 
-    @SuppressLint("ClickableViewAccessibility")
-    private fun setupMap() {
-        map.setTileSource(TileSourceFactory.MAPNIK)
-        map.setMultiTouchControls(true)
-        map.zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
-        map.isTilesScaledToDpi = true
-        map.minZoomLevel = 4.0
-        map.maxZoomLevel = 19.0
-        map.controller.setZoom(13.0)
-        map.controller.setCenter(GeoPoint(41.3111, 69.2797)) // Tashkent until we get a fix
+    /** MapLibre needs OpenGL ES 3; very old phones get a plain screen (alerts still work). */
+    private fun supportsMap(): Boolean {
+        val am = getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
+        return am.deviceConfigurationInfo.reqGlEsVersion >= 0x30000
+    }
 
-        val density = resources.displayMetrics.density
-        map.overlays.add(RotationGestureOverlay(map).apply { isEnabled = true })
-        cameraOverlay = CameraOverlay(density) { i -> showCamera(i) }
-        cameraOverlay.labelFor = { db, i -> TypeLabels.labelWithControls(this, db, i) }
-        map.overlays.add(cameraOverlay)
-        positionOverlay = PositionOverlay(density)
-        map.overlays.add(positionOverlay)
-
-        map.addMapListener(object : MapListener {
-            override fun onScroll(event: ScrollEvent?) = false.also { onMapMoved() }
-            override fun onZoom(event: ZoomEvent?) = false.also { onMapMoved() }
-        })
-        // Any drag / pinch / rotate by the user leaves follow mode (like Google Maps).
-        map.setOnTouchListener { _, ev ->
-            when (ev.actionMasked) {
-                MotionEvent.ACTION_DOWN -> { touchX = ev.x; touchY = ev.y; lastTouchAt = SystemClock.elapsedRealtime() }
-                MotionEvent.ACTION_POINTER_DOWN -> if (mode != ViewMode.FREE) setMode(ViewMode.FREE)
-                MotionEvent.ACTION_MOVE -> if (mode != ViewMode.FREE &&
-                    hypot((ev.x - touchX).toDouble(), (ev.y - touchY).toDouble()) > touchSlop
-                ) setMode(ViewMode.FREE)
-            }
-            if (ev.actionMasked != MotionEvent.ACTION_DOWN) lastTouchAt = SystemClock.elapsedRealtime()
-            false
+    private fun setupMap(savedInstanceState: Bundle?) {
+        val container = findViewById<FrameLayout>(R.id.map_container)
+        if (!supportsMap()) {
+            container.addView(TextView(this).apply {
+                setText(R.string.no_gl)
+                gravity = Gravity.CENTER
+                textSize = 16f
+                setPadding(48, 0, 48, 0)
+            }, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+            compass.visibility = View.GONE
+            modeLabel.visibility = View.GONE
+            return
         }
+        val mv = MapView(this)
+        container.addView(mv, FrameLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+        mv.onCreate(savedInstanceState)
+        mapView = mv
+        mapController = MapController(
+            context = this,
+            mapView = mv,
+            language = AppLanguage.tag(this),
+            labelFor = { db, i -> TypeLabels.labelWithControls(this, db, i) },
+            onCameraTap = { i -> showCamera(i) },
+            onUserGesture = {
+                lastTouchAt = SystemClock.elapsedRealtime()
+                if (mode != ViewMode.FREE) setMode(ViewMode.FREE)
+            },
+            onCameraMoved = { onMapMoved() },
+        )
     }
 
     private fun onMapMoved() {
-        compass.rotation = map.mapOrientation
-        hintView.visibility =
-            if (repoState is CameraRepository.State.Ready && map.zoomLevelDouble < CameraOverlay.MIN_ZOOM) View.VISIBLE else View.GONE
+        val mc = mapController ?: return
+        compass.rotation = -mc.bearing.toFloat()
+        hintView.visibility = if (!infoTabShown && repoState is CameraRepository.State.Ready &&
+            mc.zoom < MapController.MIN_CAMERA_ZOOM
+        ) View.VISIBLE else View.GONE
     }
 
     private fun setMode(newMode: ViewMode) {
@@ -274,9 +299,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
             followMode = newMode
             prefs.sp.edit().putString("follow_mode", if (newMode == ViewMode.NORTH_UP) "north" else "heading").apply()
         }
-        if (newMode != ViewMode.FREE && !shownLat.isNaN()) {
-            if (newMode == ViewMode.NORTH_UP) map.mapOrientation = 0f
-            moveCamera(shownLat, shownLon, shownCourse, snap = true)
+        if (newMode != ViewMode.FREE) {
+            snapCamera = true
+            if (!shownLat.isNaN()) moveCamera()
         }
         updateModeUi()
     }
@@ -285,10 +310,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         when (mode) {
             ViewMode.HEADING_UP -> setMode(ViewMode.NORTH_UP)
             ViewMode.NORTH_UP -> setMode(ViewMode.HEADING_UP)
-            ViewMode.FREE -> {
-                map.mapOrientation = 0f
-                onMapMoved()
-            }
+            ViewMode.FREE -> mapController?.resetNorth()
         }
     }
 
@@ -300,27 +322,13 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 ViewMode.FREE -> R.string.mode_free
             }
         )
-        compass.rotation = map.mapOrientation
     }
 
-    /** Positions the map for the follow modes. In heading-up the car sits in the lower third. */
-    private fun moveCamera(lat: Double, lon: Double, courseDeg: Double, snap: Boolean = false) {
+    private fun moveCamera() {
+        val mc = mapController ?: return
         if (mode == ViewMode.FREE) return
-        val targetZoom = autoZoom()
-        val z = map.zoomLevelDouble
-        val newZoom = if (snap) targetZoom else z + (targetZoom - z) * 0.08
-        if (abs(newZoom - z) > 0.005) map.controller.setZoom(newZoom)
-
-        val me = GeoPoint(lat, lon)
-        if (mode == ViewMode.HEADING_UP && !courseDeg.isNaN()) {
-            map.mapOrientation = (-courseDeg).toFloat()
-            val pxPerMetre = map.projection.metersToPixels(1f).toDouble().coerceAtLeast(1e-6)
-            val aheadM = map.height * 0.25 / pxPerMetre
-            map.controller.setCenter(me.destinationPoint(aheadM, courseDeg))
-        } else {
-            map.controller.setCenter(me)
-        }
-        compass.rotation = map.mapOrientation
+        mc.follow(shownLat, shownLon, shownCourse, mode == ViewMode.HEADING_UP, autoZoom(), snapCamera)
+        snapCamera = false
     }
 
     /** Closer when slow, wider on the highway. */
@@ -369,17 +377,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
         if (mode == ViewMode.FREE && DriveState.flow.value.running &&
             SystemClock.elapsedRealtime() - lastTouchAt > REFOLLOW_MS
         ) setMode(followMode)
-        positionOverlay.accuracyM = location.accuracy
         speedView.text = speedKmh.toString()
         updateSubStatus()
 
         if (shownLat.isNaN()) {
             // First fix: jump there.
             shownLat = location.latitude; shownLon = location.longitude; shownCourse = arrowCourse()
-            positionOverlay.position = GeoPoint(shownLat, shownLon)
-            positionOverlay.courseDeg = shownCourse
-            if (mode == ViewMode.FREE) setMode(followMode) else moveCamera(shownLat, shownLon, shownCourse, snap = true)
-            map.invalidate()
+            mapController?.setCar(shownLat, shownLon, shownCourse)
+            if (mode == ViewMode.FREE) setMode(followMode) else { snapCamera = true; moveCamera() }
         }
     }
 
@@ -391,23 +396,21 @@ class MainActivity : AppCompatActivity(), LocationListener {
      */
     private fun onFrame(now: Long) {
         val f = fix ?: return
-        if (shownLat.isNaN()) return
+        if (shownLat.isNaN() || infoTabShown) return
         val heading = arrowCourse()
         val speedMps = if (f.hasSpeed()) f.speed.toDouble() else 0.0
         var targetLat = f.latitude
         var targetLon = f.longitude
         if (speedMps >= GPS_COURSE_MIN_MPS && !heading.isNaN()) {
             val dt = ((now - fixAt) / 1000.0).coerceIn(0.0, MAX_PREDICT_S)
-            val p = GeoPoint(f.latitude, f.longitude).destinationPoint(speedMps * dt, heading)
-            targetLat = p.latitude; targetLon = p.longitude
+            val p = Geo.destination(f.latitude, f.longitude, speedMps * dt, heading)
+            targetLat = p[0]; targetLon = p[1]
         }
         shownLat += (targetLat - shownLat) * POSITION_EASE
         shownLon += (targetLon - shownLon) * POSITION_EASE
         shownCourse = heading
-        positionOverlay.position = GeoPoint(shownLat, shownLon)
-        positionOverlay.courseDeg = shownCourse
-        moveCamera(shownLat, shownLon, shownCourse)
-        map.invalidate()
+        mapController?.setCar(shownLat, shownLon, shownCourse)
+        moveCamera()
     }
 
     private fun startFrameLoop() {
@@ -498,9 +501,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
             is CameraRepository.State.Missing -> statusView.setText(R.string.db_missing)
             is CameraRepository.State.Error -> statusView.text = getString(R.string.db_error, state.message)
             is CameraRepository.State.Ready -> {
-                cameraOverlay.index = state.index
+                mapController?.setCameras(state.index)
                 onDriveState(DriveState.flow.value)
-                map.invalidate()
+                if (infoTabShown) CameraInfoView.fill(infoList, state.db)
             }
         }
         onMapMoved()
@@ -513,20 +516,20 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
         val ready = repoState as? CameraRepository.State.Ready
         val target = s.target
+        val opposite = s.oppositeAhead
         if (ready != null) {
             statusView.text = when {
                 !s.running -> getString(R.string.db_loaded, ready.db.version, ready.db.size)
                 !s.hasFix -> getString(R.string.no_gps)
-                target == null -> getString(R.string.no_camera)
-                else -> getString(R.string.camera_ahead, TypeLabels.labelWithControls(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
+                target != null -> getString(R.string.camera_ahead, TypeLabels.labelWithControls(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
+                // A camera just ahead that only checks the other lane: say so instead of "no cameras".
+                opposite != null -> getString(R.string.opposite_ahead, TypeLabels.label(this, ready.db, opposite.camera), opposite.distanceM.toInt() / 10 * 10)
+                else -> getString(R.string.no_camera)
             }
+            statusView.alpha = if (target == null && opposite != null && s.running) 0.7f else 1f
         }
         showLimit(target?.speedLimitKmh ?: 0, target?.overspeed == true)
-        val newHighlight = target?.camera ?: -1
-        if (newHighlight != cameraOverlay.highlighted) {
-            cameraOverlay.highlighted = newHighlight
-            map.invalidate()
-        }
+        mapController?.setHighlight(target?.camera ?: -1)
         updateSubStatus()
     }
 
@@ -579,6 +582,48 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun compassWord(bearing: Double): String {
         val words = resources.getStringArray(R.array.compass_words)
         return words[(((bearing % 360 + 360) % 360 + 22.5) / 45).toInt() % 8]
+    }
+
+    // --- Offline maps ---
+
+    private fun showOfflineDialog() {
+        val mc = mapController ?: return
+        val (bounds, tiles) = mc.visibleAreaEstimate() ?: return
+        mc.countDownloads { count ->
+            // Vector tiles average roughly 30 KB in cities.
+            val mb = (tiles * 30 / 1024).toInt().coerceAtLeast(1)
+            val tooBig = tiles > MAX_OFFLINE_TILES
+            val builder = AlertDialog.Builder(this)
+                .setTitle(R.string.menu_offline)
+                .setMessage(if (tooBig) getString(R.string.offline_too_big) else getString(R.string.offline_msg, count, mb))
+                .setNegativeButton(R.string.cancel, null)
+            if (!tooBig) builder.setPositiveButton(R.string.offline_download) { _, _ -> startDownload(bounds) }
+            if (count > 0) builder.setNeutralButton(R.string.offline_delete) { _, _ ->
+                mc.deleteDownloads { n -> Toast.makeText(this, getString(R.string.offline_deleted, n), Toast.LENGTH_LONG).show() }
+            }
+            builder.show()
+        }
+    }
+
+    private fun startDownload(bounds: org.maplibre.android.geometry.LatLngBounds) {
+        val mc = mapController ?: return
+        val progress = AlertDialog.Builder(this)
+            .setTitle(R.string.menu_offline)
+            .setMessage(getString(R.string.offline_progress, 0))
+            .setCancelable(true)
+            .show()
+        mc.downloadArea(
+            bounds, "area-${System.currentTimeMillis()}",
+            onProgress = { p -> progress.setMessage(getString(R.string.offline_progress, p)) },
+            onDone = {
+                progress.dismiss()
+                Toast.makeText(this, R.string.offline_done, Toast.LENGTH_LONG).show()
+            },
+            onFailed = { msg ->
+                progress.dismiss()
+                Toast.makeText(this, getString(R.string.offline_failed, msg), Toast.LENGTH_LONG).show()
+            },
+        )
     }
 
     // --- Permissions / service ---
@@ -638,35 +683,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
-    /** Copies an osmdroid-readable archive into the osmdroid folder, then reloads the map. */
-    private fun importMap(uri: Uri) {
-        lifecycleScope.launch {
-            val ok = withContext(Dispatchers.IO) {
-                runCatching {
-                    val name = displayName(uri)
-                    require(name.endsWith(".mbtiles") || name.endsWith(".sqlite") || name.endsWith(".zip") || name.endsWith(".gemf")) {
-                        "Unsupported file: $name"
-                    }
-                    val dest = File(Configuration.getInstance().osmdroidBasePath, name)
-                    contentResolver.openInputStream(uri)!!.use { input -> dest.outputStream().use { input.copyTo(it) } }
-                }
-            }
-            ok.onSuccess {
-                Toast.makeText(this@MainActivity, R.string.map_imported, Toast.LENGTH_LONG).show()
-                recreate() // tile provider scans archives on creation
-            }.onFailure {
-                Toast.makeText(this@MainActivity, getString(R.string.db_import_failed, it.message), Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
-    private fun displayName(uri: Uri): String {
-        contentResolver.query(uri, arrayOf(android.provider.OpenableColumns.DISPLAY_NAME), null, null, null)?.use { c ->
-            if (c.moveToFirst()) return c.getString(0).lowercase()
-        }
-        return uri.lastPathSegment?.substringAfterLast('/')?.lowercase() ?: "map.mbtiles"
-    }
-
     // --- Menu ---
 
     private var testAnnouncer: Announcer? = null
@@ -674,10 +690,11 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private fun showMenu(anchor: View) {
         val popup = PopupMenu(this, anchor)
         popup.menuInflater.inflate(R.menu.main, popup.menu)
+        popup.menu.findItem(R.id.action_offline)?.isVisible = mapController != null
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_import_db -> pickDb.launch(arrayOf("*/*"))
-                R.id.action_import_map -> pickMap.launch(arrayOf("*/*"))
+                R.id.action_offline -> showOfflineDialog()
                 R.id.action_settings -> startActivity(Intent(this, SettingsActivity::class.java))
                 R.id.action_test_alert -> {
                     val a = testAnnouncer ?: Announcer(applicationContext, prefs).also { testAnnouncer = it }
@@ -705,9 +722,14 @@ class MainActivity : AppCompatActivity(), LocationListener {
 
     // --- Lifecycle ---
 
+    override fun onStart() {
+        super.onStart()
+        mapView?.onStart()
+    }
+
     override fun onResume() {
         super.onResume()
-        map.onResume()
+        mapView?.onResume()
         startUiLocation()
         startSensors()
         startFrameLoop()
@@ -718,12 +740,28 @@ class MainActivity : AppCompatActivity(), LocationListener {
         stopUiLocation()
         sensors.unregisterListener(sensorListener)
         stopFrameLoop()
-        map.onPause()
+        mapView?.onPause()
         super.onPause()
+    }
+
+    override fun onStop() {
+        mapView?.onStop()
+        super.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        mapView?.onSaveInstanceState(outState)
+    }
+
+    override fun onLowMemory() {
+        super.onLowMemory()
+        mapView?.onLowMemory()
     }
 
     override fun onDestroy() {
         testAnnouncer?.shutdown()
+        mapView?.onDestroy()
         super.onDestroy()
     }
 
@@ -734,5 +772,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         private const val POSITION_EASE = 0.35
         private const val COMPASS_BELOW_KMH = 8
         private const val REFOLLOW_MS = 12_000L
+        /** About 150 MB of vector tiles; bigger areas take too long on a phone. */
+        private const val MAX_OFFLINE_TILES = 5000L
     }
 }

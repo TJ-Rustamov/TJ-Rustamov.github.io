@@ -13,6 +13,7 @@ import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
 import uz.camdect.R
 import uz.camdect.core.AlertEngine
+import uz.camdect.data.AppLanguage
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
 import java.util.Locale
@@ -22,6 +23,11 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
     private var tts: TextToSpeech? = null
     private var ttsReady = false
     private var ttsLang: String? = null
+    // What the engine actually speaks, and which strings it reads (may differ: see configureTts).
+    private var speakLocale: Locale = Locale.getDefault()
+    private var stringsTag: String = "en"
+    // Declared before init {} so it exists when the TTS start-up callback reads it.
+    private var pendingTest = false
     private val audio = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
     private val focusListener = AudioManager.OnAudioFocusChangeListener { }
     private val tone = runCatching { ToneGenerator(AudioManager.STREAM_MUSIC, 90) }.getOrNull()
@@ -30,8 +36,20 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         initTts()
     }
 
+    /** Wanted voice language: "uz", "ru" or "en" (Uzbek Cyrillic UI speaks Uzbek too). */
+    private fun wantedLang(): String {
+        val v = prefs.voiceLang
+        val tag = if (v == "app" || v == "system") AppLanguage.tag(context) else v
+        return when {
+            tag.startsWith("uz") -> "uz"
+            tag.startsWith("ru") -> "ru"
+            else -> "en"
+        }
+    }
+
     private fun initTts() {
-        ttsLang = prefs.voiceLang
+        ttsLang = wantedLang()
+        stringsTag = if (ttsLang == "uz") "uz-Cyrl" else ttsLang!!
         tts = TextToSpeech(context) { status ->
             ttsReady = status == TextToSpeech.SUCCESS
             if (ttsReady) {
@@ -43,9 +61,19 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
 
     private fun configureTts() {
         val t = tts ?: return
-        val locale = locale()
-        if (t.isLanguageAvailable(locale) >= TextToSpeech.LANG_AVAILABLE) t.language = locale
-        else DriveState.log("Voice: ${locale.displayLanguage} not installed, using ${t.voice?.locale?.displayLanguage ?: "default"}")
+        val want = ttsLang ?: "en"
+        if (want == "uz" && t.isLanguageAvailable(Locale("uz")) >= TextToSpeech.LANG_AVAILABLE) {
+            speakLocale = Locale("uz"); stringsTag = "uz"
+        } else if (want == "uz") {
+            // Phones rarely have an Uzbek voice. Uzbek written in Cyrillic reads well with the
+            // Russian voice, Latin Uzbek does not.
+            speakLocale = Locale("ru"); stringsTag = "uz-Cyrl"
+            DriveState.log("Voice: no Uzbek voice installed, speaking Uzbek with the Russian voice")
+        } else {
+            speakLocale = if (want == "ru") Locale("ru") else Locale.ENGLISH; stringsTag = want
+        }
+        if (t.isLanguageAvailable(speakLocale) >= TextToSpeech.LANG_AVAILABLE) t.language = speakLocale
+        else DriveState.log("Voice: ${speakLocale.displayLanguage} not installed, using ${t.voice?.locale?.displayLanguage ?: "default"}")
         t.setAudioAttributes(
             AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ASSISTANCE_NAVIGATION_GUIDANCE)
@@ -60,20 +88,15 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         })
     }
 
-    private fun locale(): Locale = when (val l = prefs.voiceLang) {
-        "system" -> Locale.getDefault()
-        else -> Locale(l)
-    }
-
     /** Strings in the voice language, independent of the UI language. */
     private fun voiceStrings(): Context {
         val conf = Configuration(context.resources.configuration)
-        conf.setLocale(locale())
+        conf.setLocale(Locale.forLanguageTag(stringsTag))
         return context.createConfigurationContext(conf)
     }
 
     fun announce(event: AlertEngine.Event, db: uz.camdect.core.CameraDb) {
-        if (prefs.voiceLang != ttsLang) {
+        if (wantedLang() != ttsLang) {
             tts?.shutdown()
             initTts()
         }
@@ -83,7 +106,7 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         if (prefs.voice) {
             val metres = roundDistance(t.distanceM)
             val s = voiceStrings()
-            val name = TypeLabels.name(db.typeCode(t.camera))
+            val name = TypeLabels.name(s, db.typeCode(t.camera))
             val withLimit = t.speedLimitKmh > 0 && event.firstForCamera
             var text = when {
                 name != null && withLimit -> s.getString(R.string.tts_named_limit, name, metres, t.speedLimitKmh)
@@ -107,7 +130,6 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         else pendingTest = true
     }
 
-    private var pendingTest = false
 
     fun overspeed() {
         if (prefs.beep) beep(3)

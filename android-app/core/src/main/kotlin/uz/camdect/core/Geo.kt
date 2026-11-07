@@ -1,6 +1,7 @@
 package uz.camdect.core
 
 import kotlin.math.abs
+import kotlin.math.asin
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
@@ -24,6 +25,17 @@ object Geo {
         val y = sin(dl) * cos(p2)
         val x = cos(p1) * sin(p2) - sin(p1) * cos(p2) * cos(dl)
         return (Math.toDegrees(atan2(y, x)) + 360.0) % 360.0
+    }
+
+    /** Point [distanceM] metres from (lat, lon) along [bearingDeg]; returns [lat, lon]. */
+    fun destination(lat: Double, lon: Double, distanceM: Double, bearingDeg: Double): DoubleArray {
+        val d = distanceM / EARTH_R
+        val b = Math.toRadians(bearingDeg)
+        val p1 = Math.toRadians(lat)
+        val l1 = Math.toRadians(lon)
+        val p2 = asin(sin(p1) * cos(d) + cos(p1) * sin(d) * cos(b))
+        val l2 = l1 + atan2(sin(b) * sin(d) * cos(p1), cos(d) - sin(p1) * sin(p2))
+        return doubleArrayOf(Math.toDegrees(p2), Math.toDegrees(l2))
     }
 
     /** Smallest absolute difference between two bearings, 0..180. */

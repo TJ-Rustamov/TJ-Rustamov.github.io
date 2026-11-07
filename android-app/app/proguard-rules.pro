@@ -1,3 +1,6 @@
-# osmdroid uses reflection-free APIs; keep its tile source classes just in case.
--keep class org.osmdroid.** { *; }
--dontwarn org.osmdroid.**
+# MapLibre uses JNI and reflection for its native map renderer.
+-keep class org.maplibre.** { *; }
+-dontwarn org.maplibre.**
+-dontwarn com.google.gson.**
+-dontwarn okhttp3.**
+-dontwarn okio.**

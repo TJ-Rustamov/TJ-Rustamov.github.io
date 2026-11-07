@@ -10,7 +10,7 @@ class Prefs(context: Context) {
     val sp: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(context)
 
     val voice get() = sp.getBoolean("voice", true)
-    val voiceLang get() = sp.getString("voice_lang", "system") ?: "system"
+    val voiceLang get() = sp.getString("voice_lang", "app") ?: "app"
     val beep get() = sp.getBoolean("beep", true)
     val vibrate get() = sp.getBoolean("vibrate", true)
     val keepScreenOn get() = sp.getBoolean("keep_screen_on", true)

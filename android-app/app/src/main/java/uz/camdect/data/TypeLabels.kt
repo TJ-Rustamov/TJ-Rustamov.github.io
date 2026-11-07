@@ -6,45 +6,51 @@ import uz.camdect.R
 import uz.camdect.core.CameraDb
 import uz.camdect.core.Control
 
-/** Names for Neoline type codes. Fixed in the app; unknown codes show their number. */
+/**
+ * Names and descriptions for Neoline type codes, as string resources so they follow the app
+ * language (Cyrillic names also let the Russian voice pronounce them). Fixed in the app;
+ * unknown codes show their number.
+ */
 object TypeLabels {
-    val NAMES: Map<Int, String> = mapOf(
-        237 to "Lochin",
-        243 to "AutoCon",
-        236 to "Cordon PRO",
-        238 to "Skat",
-        168 to "Strelka",
-        230 to "AutoUragan",
-        164 to "Arena",
-        224 to "Binar",
-        151 to "Kris-P",
-        232 to "Integra",
-        239 to "Police post",
-        233 to "Hikvision",
-        165 to "MultaRadar CD",
+    /** Code → (name, description), in the order shown on the camera info tab. */
+    val KNOWN: List<Triple<Int, Int, Int>> = listOf(
+        Triple(237, R.string.cam_237, R.string.desc_237),
+        Triple(243, R.string.cam_243, R.string.desc_243),
+        Triple(236, R.string.cam_236, R.string.desc_236),
+        Triple(238, R.string.cam_238, R.string.desc_238),
+        Triple(168, R.string.cam_168, R.string.desc_168),
+        Triple(165, R.string.cam_165, R.string.desc_165),
+        Triple(233, R.string.cam_233, R.string.desc_233),
+        Triple(230, R.string.cam_230, R.string.desc_230),
+        Triple(232, R.string.cam_232, R.string.desc_232),
+        Triple(164, R.string.cam_164, R.string.desc_164),
+        Triple(151, R.string.cam_151, R.string.desc_151),
+        Triple(224, R.string.cam_224, R.string.desc_224),
+        Triple(239, R.string.cam_239, R.string.desc_239),
     )
+    private val NAME_RES: Map<Int, Int> = KNOWN.associate { it.first to it.second }
 
-    fun name(code: Int): String? = NAMES[code]
+    fun name(context: Context, code: Int): String? = NAME_RES[code]?.let { context.getString(it) }
 
     fun label(context: Context, db: CameraDb, i: Int): String {
         val code = db.typeCode(i)
-        return name(code)
+        return name(context, code)
             ?: context.getString(if (db.speedLimit[i] > 0) R.string.type_camera else R.string.type_control, code)
     }
 
-    fun controlName(context: Context, c: Control): String = context.getString(
-        when (c) {
-            Control.RED_LIGHT -> R.string.control_red_light
-            Control.CROSSWALK -> R.string.control_crosswalk
-            Control.NO_STOPPING -> R.string.control_no_stopping
-        }
-    )
+    fun controlName(context: Context, c: Control): String = context.getString(controlRes(c))
+
+    fun controlRes(c: Control): Int = when (c) {
+        Control.RED_LIGHT -> R.string.control_red_light
+        Control.CROSSWALK -> R.string.control_crosswalk
+        Control.NO_STOPPING -> R.string.control_no_stopping
+    }
 
     /** "red light, pedestrian crossing", or "" for a speed-only camera. */
     fun controlsText(context: Context, db: CameraDb, i: Int): String =
         db.controls(i).joinToString(", ") { controlName(context, it) }
 
-    /** Name plus what else it checks, e.g. "Lochin · pedestrian crossing". */
+    /** Name plus what else it checks, e.g. "Lochin · red light". */
     fun labelWithControls(context: Context, db: CameraDb, i: Int): String {
         val controls = controlsText(context, db, i)
         return if (controls.isEmpty()) label(context, db, i) else "${label(context, db, i)} · $controls"
@@ -57,17 +63,20 @@ object TypeLabels {
         if (old.isNotEmpty()) sp.edit().apply { old.forEach { remove(it) } }.apply()
     }
 
-    /** Number of points per type code, computed once per database. */
-    private var countsFor: CameraDb? = null
-    private var counts = IntArray(256)
+    @Volatile private var countsFor: CameraDb? = null
+    @Volatile private var counts = IntArray(256)
 
+    /** Number of points per type code. Call [prepareCounts] off the UI thread first. */
     fun count(db: CameraDb, code: Int): Int {
-        if (countsFor !== db) {
-            val c = IntArray(256)
-            for (i in 0 until db.size) c[db.typeCode(i)]++
-            counts = c
-            countsFor = db
-        }
+        if (countsFor !== db) prepareCounts(db)
         return counts[code]
+    }
+
+    fun prepareCounts(db: CameraDb) {
+        if (countsFor === db) return
+        val c = IntArray(256)
+        for (i in 0 until db.size) c[db.typeCode(i)]++
+        counts = c
+        countsFor = db
     }
 }

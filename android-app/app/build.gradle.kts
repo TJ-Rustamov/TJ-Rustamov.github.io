@@ -44,5 +44,6 @@ dependencies {
     implementation("androidx.preference:preference-ktx:1.2.1")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.8.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
-    implementation("org.osmdroid:osmdroid-android:6.1.20")
+    // Vector map: labels stay upright when the map rotates; offline regions. 11.x keeps minSdk 21.
+    implementation("org.maplibre.gl:android-sdk:11.13.5")
 }

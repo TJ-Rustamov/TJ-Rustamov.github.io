@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from one table so every language has every string. -->
+<resources>
+    <string name="app_name">CamDect</string>
+    <string name="settings">Созламалар</string>
+    <string name="start">Бошлаш</string>
+    <string name="stop">Тўхтатиш</string>
+    <string name="center">Марказ</string>
+    <string name="cancel">Бекор қилиш</string>
+    <string name="menu">Меню</string>
+    <string name="menu_import_db">Камера базасини юклаш</string>
+    <string name="menu_db_info">База ҳақида</string>
+    <string name="menu_offline">Офлайн хариталар</string>
+    <string name="menu_test_alert">Овозни синаш</string>
+    <string name="menu_log">Огоҳлантиришлар журнали</string>
+    <string name="db_loading">Камера базаси юкланмоқда…</string>
+    <string name="db_missing">Камера базаси йўқ. X-COP_7500s_Baza_GPS.db файлини юклаш учун босинг</string>
+    <string name="db_error">База хатоси: %1$s</string>
+    <string name="db_loaded">База %1$s: %2$d та нуқта</string>
+    <string name="db_import_failed">Юклаб бўлмади: %1$s</string>
+    <string name="no_gps">GPS кутилмоқда…</string>
+    <string name="no_camera">Олдинда камера йўқ</string>
+    <string name="kmh">км/соат</string>
+    <string name="camera_ahead">%1$s · %2$d м</string>
+    <string name="opposite_ahead">%1$s · %2$d м · қарама-қарши йўналиш учун</string>
+    <string name="zoom_in_hint">Камераларни кўриш учун яқинлаштиринг</string>
+    <string name="perm_location_needed">Камералар ҳақида огоҳлантириш учун жойлашувга рухсат керак.</string>
+    <string name="battery_title">Фонда ишлаш</string>
+    <string name="battery_msg">Экран ўчиқ бўлганда ҳам огоҳлантиришлар ишлаши учун CamDect\'га батарея тежаш чекловидан чиқишга рухсат беринг.</string>
+    <string name="allow">Рухсат бериш</string>
+    <string name="later">Кейинроқ</string>
+    <string name="notif_channel_drive">Ҳайдаш режими</string>
+    <string name="notif_channel_alert">Камера огоҳлантиришлари</string>
+    <string name="notif_running">Камералар кузатилмоқда</string>
+    <string name="notif_stop">Тўхтатиш</string>
+    <string name="compass">Харита йўналиши</string>
+    <string name="mode_heading">Ҳаракат бўйича</string>
+    <string name="mode_north">Шимол тепада</string>
+    <string name="mode_free">Эркин</string>
+    <string name="type_camera">Камера #%1$d</string>
+    <string name="type_control">Назорат #%1$d</string>
+    <string name="gps_accuracy">GPS ±%1$d м · %2$s</string>
+    <string name="service_off">Огоҳлантиришлар ўчиқ: Бошлаш\'ни босинг</string>
+    <string name="service_on">Огоҳлантиришлар ёқилган</string>
+    <string name="log_empty">Журнал бўш.</string>
+    <string name="type_dialog_msg">Тезлик чегараси: %1$s\n%2$s томонга (%3$d°) кетаётган машиналарни текширади\nУларни %4$s суратга олади\nХавфли ҳудуд: объектив олдида %5$d м\n\nТур коди %6$d (базада %7$d та нуқта)</string>
+    <string name="seen_front">олд томондан</string>
+    <string name="seen_rear">орқа томондан</string>
+    <string name="control_red_light">светофор</string>
+    <string name="control_crosswalk">пиёдалар ўтиш жойи</string>
+    <string name="control_no_stopping">тўхташ тақиқланган</string>
+    <string name="tts_controls">, %1$s</string>
+    <string name="checks_also">Яна текширади: %1$s</string>
+    <string name="checks_speed_only">Фақат тезлик</string>
+    <string name="no_limit">йўқ</string>
+    <string name="tts_test">400 метрдан кейин камера, чегара 60</string>
+    <string name="tts_named">%2$d метрдан кейин %1$s</string>
+    <string name="tts_named_limit">%2$d метрдан кейин %1$s, чегара %3$d</string>
+    <string name="tts_camera">%1$d метрдан кейин камера</string>
+    <string name="tts_camera_limit">%1$d метрдан кейин камера, чегара %2$d</string>
+    <string name="tts_control">%1$d метрдан кейин назорат нуқтаси</string>
+    <string name="tts_slow_down">Тезликни пасайтиринг</string>
+    <string name="pref_cat_general">Умумий</string>
+    <string name="pref_app_lang">Тил</string>
+    <string name="pref_cat_alerts">Огоҳлантиришлар</string>
+    <string name="pref_voice">Овозли огоҳлантириш</string>
+    <string name="pref_voice_lang">Овоз тили</string>
+    <string name="pref_beep">Сигнал</string>
+    <string name="pref_vibrate">Тебраниш</string>
+    <string name="pref_min_distance">Энг кичик огоҳлантириш масофаси</string>
+    <string name="pref_overspeed">Рухсат этилган ошириш</string>
+    <string name="pref_ignore_no_limit">Тезлик чегараси йўқ нуқталарни ҳисобга олмаслик</string>
+    <string name="pref_cat_map">Харита</string>
+    <string name="pref_keep_screen">Ҳайдаш пайтида экранни ёниқ сақлаш</string>
+    <string name="pref_cat_db">База</string>
+    <string name="pref_db_info">Камера базаси</string>
+    <string name="tab_map">Харита</string>
+    <string name="tab_info">Камера маълумотлари</string>
+    <string name="info_header">Камера турлари</string>
+    <string name="info_controls_header">Камералар яна нимани текширади</string>
+    <string name="info_points">базада %1$d та нуқта</string>
+    <string name="info_other">Бошқа камералар \"Камера #код\" деб кўрсатилади ва барибир огоҳлантиради.</string>
+    <string name="offline_msg">Юкланган ҳудудлар: %1$d\n\nЭкрандаги ҳудудни офлайн учун юклаб оласизми? Тахминан %2$d МБ.</string>
+    <string name="offline_download">Юклаб олиш</string>
+    <string name="offline_delete">Ҳаммасини ўчириш</string>
+    <string name="offline_progress">Харита юкланмоқда… %1$d%%</string>
+    <string name="offline_done">Харита ҳудуди офлайн учун сақланди</string>
+    <string name="offline_deleted">Ўчирилган ҳудудлар: %1$d</string>
+    <string name="offline_failed">Юклаб бўлмади: %1$s</string>
+    <string name="offline_too_big">Бу ҳудуд жуда катта. Аввал шаҳар ёки вилоятга яқинлаштиринг.</string>
+    <string name="no_gl">Бу телефон графикаси харитани кўрсатиш учун эски. Камера огоҳлантиришлари барибир ишлайди.</string>
+    <string name="map_no_internet">Харита ҳали юкланмаган: бир марта интернетга уланинг ёки ҳудудни юклаб олинг. Огоҳлантиришлар офлайн ишлайди.</string>
+    <string name="cam_165">МультаРадар CD</string>
+    <string name="desc_165">Радар-детекторлардан яшириниш учун мўлжалланган кам қувватли кўчма трипод радар; тезликни ўлчайди.</string>
+    <string name="cam_168">Стрелка</string>
+    <string name="desc_168">Бир нечта қатордаги кўп машиналарни кузатувчи узоқ масофали импульсли радар; тезлик ва қатор бузилишлари.</string>
+    <string name="cam_237">Лочин</string>
+    <string name="desc_237">Радар билан сунъий интеллект видео таҳлили: тезлик, хавфсизлик камари ва телефондан фойдаланиш.</string>
+    <string name="cam_243">АвтоКон (пистирма)</string>
+    <string name="desc_243">Ақлли кўчма ёки стационар комплекс, кўпинча пистирма сифатида қўйилади: қаторлар, светофор, рўйхат ҳолати ва аниқ тезлик.</string>
+    <string name="cam_236">Кордон ПРО</string>
+    <string name="desc_236">Йўлга қаратилган кам нурланишли радар, устунда ёки триподда; детекторлар кеч сезади.</string>
+    <string name="cam_238">Скат</string>
+    <string name="desc_238">Ясси антенали кўп қаторли, кўп нишонли радар; трассаларда кўпинча тўсиқ ортида яширинган.</string>
+    <string name="cam_233">Хиквижн</string>
+    <string name="desc_233">Шаҳар чорраҳаси назорати: тор нурли радар ва HD камералар, тезликдан нотўғри бурилишгача.</string>
+    <string name="cam_230">АвтоУраган</string>
+    <string name="desc_230">Шаҳар устунларидаги кучли стационар камера: рақамни аниқлаш ва аниқ тезлик.</string>
+    <string name="cam_164">Арена</string>
+    <string name="desc_164">Эски, аммо ишончли фото-радар; машиналарни фақат олд томондан суратга олади.</string>
+    <string name="cam_224">Бинар</string>
+    <string name="desc_224">Патрул ходимларининг қўл ёки автомобиль радари.</string>
+    <string name="cam_151">Крис-П</string>
+    <string name="desc_151">Ҳар бир қатор бўйича тезликни ўлчайдиган кўчма трипод.</string>
+    <string name="cam_232">Интегра</string>
+    <string name="desc_232">Шаҳар кўчаларида чорраҳа ва тезликни назорат қилувчи аппарат-дастур тизими.</string>
+    <string name="cam_239">ЙПХ пости</string>
+    <string name="desc_239">Доимий ЙПХ пости, оғирлик назорати ёки чегара пости.</string>
+    <string name="desc_red_light">Чорраҳадаги камера: қизил чироққа ўтишни текширади.</string>
+    <string name="desc_crosswalk">Пиёдаларга йўл беришни текширади.</string>
+    <string name="desc_no_stopping">Тақиқланган жойда тўхташ ёки туришни текширади.</string>
+    <string-array name="compass_words">
+        <item>шимол ↑</item>
+        <item>шимоли-шарқ ↗</item>
+        <item>шарқ →</item>
+        <item>жануби-шарқ ↘</item>
+        <item>жануб ↓</item>
+        <item>жануби-ғарб ↙</item>
+        <item>ғарб ←</item>
+        <item>шимоли-ғарб ↖</item>
+    </string-array>
+    <string-array name="voice_lang_entries">
+        <item>Илова тили</item>
+        <item>O\'zbekcha</item>
+        <item>Русский</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="distance_entries">
+        <item>300 м</item>
+        <item>400 м</item>
+        <item>600 м</item>
+        <item>800 м</item>
+    </string-array>
+    <string-array name="margin_entries">
+        <item>0 км/соат</item>
+        <item>+5 км/соат</item>
+        <item>+10 км/соат</item>
+        <item>+20 км/соат</item>
+    </string-array>
+</resources>

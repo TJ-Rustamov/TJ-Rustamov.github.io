@@ -1,23 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Generated from one table so every language has every string. -->
 <resources>
+    <string name="app_name">CamDect</string>
     <string name="settings">Настройки</string>
     <string name="start">Старт</string>
     <string name="stop">Стоп</string>
     <string name="center">Центр</string>
+    <string name="cancel">Отмена</string>
+    <string name="menu">Меню</string>
     <string name="menu_import_db">Импорт базы камер</string>
-    <string name="menu_import_map">Импорт офлайн-карты (.mbtiles / .sqlite)</string>
     <string name="menu_db_info">О базе</string>
+    <string name="menu_offline">Офлайн-карты</string>
+    <string name="menu_test_alert">Проверить звук</string>
+    <string name="menu_log">Журнал предупреждений</string>
     <string name="db_loading">Загрузка базы камер…</string>
     <string name="db_missing">База камер не загружена. Нажмите, чтобы импортировать X-COP_7500s_Baza_GPS.db</string>
     <string name="db_error">Ошибка базы: %1$s</string>
     <string name="db_loaded">База %1$s: %2$d точек</string>
     <string name="db_import_failed">Ошибка импорта: %1$s</string>
-    <string name="map_imported">Офлайн-карта импортирована</string>
     <string name="no_gps">Ожидание GPS…</string>
     <string name="no_camera">Камер впереди нет</string>
     <string name="kmh">км/ч</string>
     <string name="camera_ahead">%1$s · %2$d м</string>
-    <string name="limit">огр. %1$d</string>
+    <string name="opposite_ahead">%1$s · %2$d м · для встречного направления</string>
     <string name="zoom_in_hint">Приблизьте карту, чтобы увидеть камеры</string>
     <string name="perm_location_needed">Для предупреждений о камерах нужен доступ к местоположению.</string>
     <string name="battery_title">Работа в фоне</string>
@@ -28,12 +33,7 @@
     <string name="notif_channel_alert">Предупреждения о камерах</string>
     <string name="notif_running">Слежу за камерами</string>
     <string name="notif_stop">Стоп</string>
-    <string name="camera_info">%1$s\nНаправление %2$d°, код типа %3$d</string>
-
-    <string name="menu">Меню</string>
     <string name="compass">Ориентация карты</string>
-    <string name="menu_test_alert">Проверить звук</string>
-    <string name="menu_log">Журнал предупреждений</string>
     <string name="mode_heading">По движению</string>
     <string name="mode_north">Север вверху</string>
     <string name="mode_free">Свободно</string>
@@ -46,16 +46,6 @@
     <string name="type_dialog_msg">Ограничение: %1$s\nКонтролирует машины, едущие на %2$s (%3$d°)\nСнимает %4$s\nОпасная зона: %5$d м перед объективом\n\nКод типа %6$d (%7$d точек в базе)</string>
     <string name="seen_front">спереди</string>
     <string name="seen_rear">сзади (в спину)</string>
-    <string-array name="compass_words">
-        <item>север ↑</item>
-        <item>северо-восток ↗</item>
-        <item>восток →</item>
-        <item>юго-восток ↘</item>
-        <item>юг ↓</item>
-        <item>юго-запад ↙</item>
-        <item>запад ←</item>
-        <item>северо-запад ↖</item>
-    </string-array>
     <string name="control_red_light">светофор</string>
     <string name="control_crosswalk">пешеходный переход</string>
     <string name="control_no_stopping">запрет остановки</string>
@@ -70,7 +60,8 @@
     <string name="tts_camera_limit">Камера через %1$d метров, ограничение %2$d</string>
     <string name="tts_control">Контроль через %1$d метров</string>
     <string name="tts_slow_down">Снизьте скорость</string>
-
+    <string name="pref_cat_general">Общие</string>
+    <string name="pref_app_lang">Язык</string>
     <string name="pref_cat_alerts">Предупреждения</string>
     <string name="pref_voice">Голосовые предупреждения</string>
     <string name="pref_voice_lang">Язык голоса</string>
@@ -83,4 +74,77 @@
     <string name="pref_keep_screen">Не выключать экран в поездке</string>
     <string name="pref_cat_db">База</string>
     <string name="pref_db_info">База камер</string>
+    <string name="tab_map">Карта</string>
+    <string name="tab_info">О камерах</string>
+    <string name="info_header">Типы камер</string>
+    <string name="info_controls_header">Что ещё контролируют камеры</string>
+    <string name="info_points">в базе %1$d точек</string>
+    <string name="info_other">Остальные камеры показаны как «Камера #код» и тоже предупреждают.</string>
+    <string name="offline_msg">Загружено областей: %1$d\n\nСкачать область на экране для офлайн? Примерно %2$d МБ.</string>
+    <string name="offline_download">Скачать</string>
+    <string name="offline_delete">Удалить все</string>
+    <string name="offline_progress">Загрузка карты… %1$d%%</string>
+    <string name="offline_done">Область карты сохранена для офлайн</string>
+    <string name="offline_deleted">Удалено областей: %1$d</string>
+    <string name="offline_failed">Ошибка загрузки: %1$s</string>
+    <string name="offline_too_big">Слишком большая область. Сначала приблизьте город или регион.</string>
+    <string name="no_gl">Графика этого телефона слишком старая для карты. Предупреждения о камерах работают.</string>
+    <string name="map_no_internet">Карта ещё не загружена: подключитесь к интернету или скачайте область. Предупреждения работают офлайн.</string>
+    <string name="cam_165">МультаРадар CD</string>
+    <string name="desc_165">Маломощный мобильный радар на треноге, малозаметный для радар-детекторов; фиксирует превышение скорости.</string>
+    <string name="cam_168">Стрелка</string>
+    <string name="desc_168">Импульсный радар дальнего действия, следит за многими машинами на нескольких полосах; скорость и рядность.</string>
+    <string name="cam_237">Лочин</string>
+    <string name="desc_237">ИИ-видеоаналитика с радаром: скорость, ремень безопасности и телефон за рулём.</string>
+    <string name="cam_243">АвтоКон (засада)</string>
+    <string name="desc_243">Умный мобильный или стационарный комплекс, часто стоит в засаде: полосы, светофор, регистрация и точная скорость.</string>
+    <string name="cam_236">Кордон ПРО</string>
+    <string name="desc_236">Маломощный радар, направленный на дорогу, на опорах или треногах; детекторы замечают его поздно.</string>
+    <string name="cam_238">Скат</string>
+    <string name="desc_238">Многополосный многоцелевой радар с плоскими антеннами, на трассах часто спрятан за ограждением.</string>
+    <string name="cam_233">Хиквижн</string>
+    <string name="desc_233">Контроль городских перекрёстков: узконаправленный радар и HD-камеры, от скорости до неправильных поворотов.</string>
+    <string name="cam_230">АвтоУраган</string>
+    <string name="desc_230">Мощная стационарная камера на городских опорах: распознавание номеров и точная скорость.</string>
+    <string name="cam_164">Арена</string>
+    <string name="desc_164">Старый, но надёжный фоторадар; снимает машины только спереди.</string>
+    <string name="cam_224">Бинар</string>
+    <string name="desc_224">Ручной или автомобильный радар патрульных.</string>
+    <string name="cam_151">Крис-П</string>
+    <string name="desc_151">Мобильная тренога, измеряющая скорость по каждой полосе.</string>
+    <string name="cam_232">Интегра</string>
+    <string name="desc_232">Программно-аппаратный комплекс контроля перекрёстков и скорости в городе.</string>
+    <string name="cam_239">Пост ДПС</string>
+    <string name="desc_239">Стационарный пост ДПС, весовой контроль или пограничный пост.</string>
+    <string name="desc_red_light">Камера на перекрёстке: проезд на красный свет.</string>
+    <string name="desc_crosswalk">Контроль пропуска пешеходов на переходе.</string>
+    <string name="desc_no_stopping">Контроль остановки и стоянки в запрещённых местах.</string>
+    <string-array name="compass_words">
+        <item>север ↑</item>
+        <item>северо-восток ↗</item>
+        <item>восток →</item>
+        <item>юго-восток ↘</item>
+        <item>юг ↓</item>
+        <item>юго-запад ↙</item>
+        <item>запад ←</item>
+        <item>северо-запад ↖</item>
+    </string-array>
+    <string-array name="voice_lang_entries">
+        <item>Как в приложении</item>
+        <item>O\'zbekcha</item>
+        <item>Русский</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="distance_entries">
+        <item>300 м</item>
+        <item>400 м</item>
+        <item>600 м</item>
+        <item>800 м</item>
+    </string-array>
+    <string-array name="margin_entries">
+        <item>0 км/ч</item>
+        <item>+5 км/ч</item>
+        <item>+10 км/ч</item>
+        <item>+20 км/ч</item>
+    </string-array>
 </resources>

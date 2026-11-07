@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.preference.PreferenceFragmentCompat
 import uz.camdect.R
+import androidx.preference.ListPreference
+import uz.camdect.data.AppLanguage
 import uz.camdect.data.CameraRepository
 
 class SettingsActivity : AppCompatActivity() {
@@ -26,6 +28,11 @@ class SettingsActivity : AppCompatActivity() {
             findPreference<androidx.preference.Preference>("db_info")?.summary =
                 CameraRepository.ready?.let { getString(R.string.db_loaded, it.db.version, it.db.size) }
                     ?: getString(R.string.db_missing)
+            findPreference<ListPreference>(AppLanguage.KEY)?.setOnPreferenceChangeListener { _, value ->
+                // Saved first, then AppCompat recreates the screens in the new language.
+                view?.post { AppLanguage.apply(value as String) }
+                true
+            }
         }
     }
 }

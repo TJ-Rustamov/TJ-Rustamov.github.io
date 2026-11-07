@@ -44,6 +44,16 @@ class AlertEngineTest {
     }
 
     @Test
+    fun reportsCameraForOtherDirectionWithoutAlert() {
+        // Driving south towards the camera, which only checks northbound traffic.
+        val r = engine.update(camLat + 200 / 111_320.0, camLon, 15.0, 180.0)
+        assertNull(r.target)
+        assertTrue(r.events.isEmpty())
+        assertNotNull(r.oppositeAhead)
+        assertEquals(200.0, r.oppositeAhead!!.distanceM, 5.0)
+    }
+
+    @Test
     fun ignoresCameraTooFarAhead() {
         assertNull(engine.update(latSouthOfCam(1400.0), camLon, 10.0, 0.0).target)
         // At highway speed the look-ahead grows: 30 m/s * 15 s = 450 m minimum, capped 1500.

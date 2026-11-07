@@ -41,7 +41,11 @@ class AlertEngine(private val index: CameraIndex, var config: Config = Config())
     /** One-shot event the UI/service should announce. */
     data class Event(val target: Target, val firstForCamera: Boolean)
 
-    data class Result(val target: Target?, val events: List<Event>, val speedKmh: Int)
+    /**
+     * @param oppositeAhead nearest camera just ahead that only checks the other direction:
+     *  no alert, but the UI says so instead of "no cameras ahead".
+     */
+    data class Result(val target: Target?, val events: List<Event>, val speedKmh: Int, val oppositeAhead: Target? = null)
 
     private val db = index.db
     private val candidates = IntList(64)
@@ -65,6 +69,7 @@ class AlertEngine(private val index: CameraIndex, var config: Config = Config())
         index.nearby(lat, lon, max(alertDist, FORGET_DISTANCE_M), candidates)
 
         var best: Target? = null
+        var opposite: Target? = null
         val stillRelevant = HashSet<Int>()
         for (k in 0 until candidates.size) {
             val i = candidates[k]
@@ -79,6 +84,9 @@ class AlertEngine(private val index: CameraIndex, var config: Config = Config())
             val aheadTol = if (d < 60) 75.0 else config.aheadToleranceDeg
             val ahead = Geo.angleDiff(bearingTo, course) <= aheadTol
             val sameDirection = Geo.angleDiff(db.heading[i].toDouble(), course) <= config.headingToleranceDeg
+            if (ahead && !sameDirection && d <= OPPOSITE_SHOW_M && (opposite == null || d < opposite.distanceM)) {
+                opposite = Target(i, d, Level.FAR, limit, false)
+            }
             if (!ahead || !sameDirection) continue
             stillRelevant.add(i)
             if (d > alertDist) continue
@@ -103,12 +111,13 @@ class AlertEngine(private val index: CameraIndex, var config: Config = Config())
                 events.add(Event(best, prev == null))
             }
         }
-        return Result(best, events, speedKmh)
+        return Result(best, events, speedKmh, if (best == null) opposite else null)
     }
 
     companion object {
         const val NEAR_M = 400.0
         const val CLOSE_M = 150.0
         private const val FORGET_DISTANCE_M = 600.0
+        const val OPPOSITE_SHOW_M = 300.0
     }
 }

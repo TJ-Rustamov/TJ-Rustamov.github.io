@@ -18,6 +18,8 @@ object DriveState {
         val courseDeg: Double = Double.NaN,
         val accuracyM: Int = 0,
         val target: AlertEngine.Target? = null,
+        /** Camera just ahead that only checks the opposite direction (shown, not announced). */
+        val oppositeAhead: AlertEngine.Target? = null,
     )
 
     internal val mutable = MutableStateFlow(Snapshot())

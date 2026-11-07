@@ -25,6 +25,7 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import uz.camdect.R
 import uz.camdect.core.AlertEngine
+import uz.camdect.data.AppLanguage
 import uz.camdect.data.CameraRepository
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
@@ -46,6 +47,9 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
     private var gotFix = false
 
     override fun onBind(intent: Intent?): IBinder? = null
+
+    // Notifications in the app language even where Android only gives services the system one.
+    override fun attachBaseContext(base: Context) = super.attachBaseContext(AppLanguage.wrap(base))
 
     override fun onCreate() {
         super.onCreate()
@@ -106,6 +110,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
         val course = if (location.hasBearing()) location.bearing.toDouble() else Double.NaN
 
         var target: AlertEngine.Target? = null
+        var opposite: AlertEngine.Target? = null
         if (ready != null) {
             if (engine == null || engineDb !== ready.db) {
                 engine = AlertEngine(ready.index, prefs.alertConfig())
@@ -113,6 +118,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
             }
             val result = engine!!.update(location.latitude, location.longitude, speedMps, course)
             target = result.target
+            opposite = result.oppositeAhead
             for (e in result.events) {
                 announcer.announce(e, ready.db)
                 val c = e.target.camera
@@ -127,22 +133,27 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
                 announcer.overspeed()
                 DriveState.log("Overspeed: ${result.speedKmh} km/h, limit ${target.speedLimitKmh}")
             }
-            updateNotification(target, ready)
+            updateNotification(target, ready, popUp = result.events.any { it.firstForCamera })
         }
         DriveState.mutable.value = DriveState.Snapshot(
             running = true, hasFix = true,
             lat = location.latitude, lon = location.longitude,
             speedKmh = (speedMps * 3.6).toInt(), courseDeg = course, accuracyM = location.accuracy.toInt(), target = target,
+            oppositeAhead = opposite,
         )
     }
 
-    private fun updateNotification(target: AlertEngine.Target?, ready: CameraRepository.State.Ready) {
+    /**
+     * Pops up (heads-up) only when a new camera is first announced; distance updates after
+     * that replace the text silently instead of re-alerting every 10 m.
+     */
+    private fun updateNotification(target: AlertEngine.Target?, ready: CameraRepository.State.Ready, popUp: Boolean) {
         val text = if (target == null) getString(R.string.notif_running)
         else getString(R.string.camera_ahead, TypeLabels.labelWithControls(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
-        if (text == lastNotifText) return
+        if (text == lastNotifText && !popUp) return
         lastNotifText = text
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        nm.notify(NOTIF_ID, buildNotification(text, alert = target != null))
+        nm.notify(NOTIF_ID, buildNotification(text, alert = popUp))
     }
 
     private fun buildNotification(text: String, alert: Boolean = false): Notification {
@@ -159,7 +170,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
             .setContentTitle(getString(R.string.app_name))
             .setContentText(text)
             .setOngoing(true)
-            .setOnlyAlertOnce(!alert)
+            .setOnlyAlertOnce(!alert) // only a newly announced camera may pop up
             .setSilent(true) // sound comes from Announcer
             .setPriority(if (alert) NotificationCompat.PRIORITY_HIGH else NotificationCompat.PRIORITY_LOW)
             .setCategory(NotificationCompat.CATEGORY_NAVIGATION)
