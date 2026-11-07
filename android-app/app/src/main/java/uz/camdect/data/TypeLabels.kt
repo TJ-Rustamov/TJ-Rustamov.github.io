@@ -9,6 +9,9 @@ import uz.camdect.core.CameraDb
 object TypeLabels {
     val NAMES: Map<Int, String> = mapOf(
         237 to "Lochin",
+        243 to "AutoCon",
+        236 to "Cordon PRO",
+        238 to "Skat",
         233 to "Hikvision",
         165 to "MultaRadar CD",
     )
