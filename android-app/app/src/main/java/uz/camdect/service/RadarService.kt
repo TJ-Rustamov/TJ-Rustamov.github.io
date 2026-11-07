@@ -117,7 +117,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
                 announcer.announce(e, ready.db)
                 val c = e.target.camera
                 DriveState.log(
-                    "${TypeLabels.label(this, ready.db, c)} ${e.target.level} ${e.target.distanceM.toInt()} m, " +
+                    "${TypeLabels.labelWithControls(this, ready.db, c)} ${e.target.level} ${e.target.distanceM.toInt()} m, " +
                         "limit ${e.target.speedLimitKmh}, you ${result.speedKmh} km/h"
                 )
             }
@@ -138,7 +138,7 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
 
     private fun updateNotification(target: AlertEngine.Target?, ready: CameraRepository.State.Ready) {
         val text = if (target == null) getString(R.string.notif_running)
-        else getString(R.string.camera_ahead, TypeLabels.label(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
+        else getString(R.string.camera_ahead, TypeLabels.labelWithControls(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
         if (text == lastNotifText) return
         lastNotifText = text
         val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

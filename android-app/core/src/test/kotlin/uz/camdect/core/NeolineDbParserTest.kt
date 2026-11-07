@@ -12,7 +12,7 @@ class NeolineDbParserTest {
         val db = NeolineDbParser.parse(
             TestDb.build(
                 listOf(
-                    TestDb.Point(41.3111, 69.2797, 90, 60),
+                    TestDb.Point(41.3111, 69.2797, 90, 60, controls = setOf(Control.RED_LIGHT, Control.CROSSWALK)),
                     TestDb.Point(55.7539, 37.6208, 270, 0, type = 0xEF, rear = true, rangeM = 0),
                 )
             )
@@ -34,6 +34,9 @@ class NeolineDbParserTest {
         assertEquals(false, db.isRear(1))
         assertEquals(270.0, db.lensBearing(1), 1e-9)
         assertEquals(400, db.coverageM(1))
+        assertEquals(listOf(Control.RED_LIGHT, Control.CROSSWALK), db.controls(1))
+        assertEquals(false, db.isRear(1)) // control bits must not touch the rear bit
+        assertEquals(emptyList<Control>(), db.controls(0))
     }
 
     @Test(expected = IOException::class)

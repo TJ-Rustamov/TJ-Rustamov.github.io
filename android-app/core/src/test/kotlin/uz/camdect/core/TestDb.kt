@@ -4,7 +4,7 @@ package uz.camdect.core
 object TestDb {
     data class Point(
         val lat: Double, val lon: Double, val heading: Int, val speed: Int, val type: Int = 0xA5,
-        val rear: Boolean = false, val rangeM: Int = 400,
+        val rear: Boolean = false, val rangeM: Int = 400, val controls: Set<Control> = emptySet(),
     )
 
     fun build(points: List<Point>, version: String = "241026"): ByteArray {
@@ -23,7 +23,7 @@ object TestDb {
             putBe(plain, 5, 4, Math.round(p.lon * 10_000).toInt())
             putBe(plain, 9, 2, p.heading)
             putBe(plain, 12, 1, p.speed)
-            plain[21] = if (p.rear) 0x04 else 0
+            plain[21] = (if (p.rear) 0x04 else 0) or p.controls.fold(0) { acc, c -> acc or (1 shl c.bit) }
             plain[23] = p.rangeM / 10
             for (i in plain.indices) out[o + i] = (plain[i] xor NeolineDbParser.KEY[i]).toByte()
         }

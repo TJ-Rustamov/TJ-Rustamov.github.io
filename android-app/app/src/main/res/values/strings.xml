@@ -58,6 +58,12 @@
         <item>west ←</item>
         <item>northwest ↖</item>
     </string-array>
+    <string name="control_red_light">red light</string>
+    <string name="control_crosswalk">pedestrian crossing</string>
+    <string name="control_no_stopping">no stopping</string>
+    <string name="tts_controls">, %1$s</string>
+    <string name="checks_also">Also checks: %1$s</string>
+    <string name="checks_speed_only">Checks speed only</string>
     <string name="no_limit">none</string>
     <string name="tts_test">Camera in 400 metres, limit 60</string>
     <string name="tts_named">%1$s in %2$d metres</string>

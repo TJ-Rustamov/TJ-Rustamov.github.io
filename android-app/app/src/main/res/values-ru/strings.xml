@@ -56,6 +56,12 @@
         <item>запад ←</item>
         <item>северо-запад ↖</item>
     </string-array>
+    <string name="control_red_light">светофор</string>
+    <string name="control_crosswalk">пешеходный переход</string>
+    <string name="control_no_stopping">запрет остановки</string>
+    <string name="tts_controls">, %1$s</string>
+    <string name="checks_also">Также контролирует: %1$s</string>
+    <string name="checks_speed_only">Только скорость</string>
     <string name="no_limit">нет</string>
     <string name="tts_test">Камера через 400 метров, ограничение 60</string>
     <string name="tts_named">%1$s через %2$d метров</string>

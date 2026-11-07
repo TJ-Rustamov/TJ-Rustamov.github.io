@@ -85,13 +85,16 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
             val s = voiceStrings()
             val name = TypeLabels.name(db.typeCode(t.camera))
             val withLimit = t.speedLimitKmh > 0 && event.firstForCamera
-            val text = when {
+            var text = when {
                 name != null && withLimit -> s.getString(R.string.tts_named_limit, name, metres, t.speedLimitKmh)
                 name != null -> s.getString(R.string.tts_named, name, metres)
                 withLimit -> s.getString(R.string.tts_camera_limit, metres, t.speedLimitKmh)
                 t.speedLimitKmh > 0 -> s.getString(R.string.tts_camera, metres)
                 else -> s.getString(R.string.tts_control, metres)
             }
+            // Say what else it checks on the first warning, e.g. "..., pedestrian crossing".
+            val controls = TypeLabels.controlsText(s, db, t.camera)
+            if (event.firstForCamera && controls.isNotEmpty()) text += s.getString(R.string.tts_controls, controls)
             speak(text)
         }
     }

@@ -34,6 +34,14 @@ class CameraDb(
     /** True when the camera photographs cars from behind (they drive away from it). */
     fun isRear(i: Int): Boolean = (cameraFlags[i].toInt() and REAR_BIT) != 0
 
+    /** Violations checked besides speed (red light, pedestrian crossing, ...). */
+    fun controls(i: Int): List<Control> {
+        val f = cameraFlags[i].toInt()
+        return Control.values().filter { (f shr it.bit) and 1 == 1 }
+    }
+
+    fun hasControl(i: Int, c: Control): Boolean = (cameraFlags[i].toInt() shr c.bit) and 1 == 1
+
     /** How far the camera's danger area reaches, metres. */
     fun coverageM(i: Int): Int = rangeM[i].toInt().takeIf { it > 0 } ?: DEFAULT_COVERAGE_M
 

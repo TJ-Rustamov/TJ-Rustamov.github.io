@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.preference.PreferenceManager
 import uz.camdect.R
 import uz.camdect.core.CameraDb
+import uz.camdect.core.Control
 
 /** Names for Neoline type codes. Fixed in the app; unknown codes show their number. */
 object TypeLabels {
@@ -29,6 +30,24 @@ object TypeLabels {
         val code = db.typeCode(i)
         return name(code)
             ?: context.getString(if (db.speedLimit[i] > 0) R.string.type_camera else R.string.type_control, code)
+    }
+
+    fun controlName(context: Context, c: Control): String = context.getString(
+        when (c) {
+            Control.RED_LIGHT -> R.string.control_red_light
+            Control.CROSSWALK -> R.string.control_crosswalk
+            Control.NO_STOPPING -> R.string.control_no_stopping
+        }
+    )
+
+    /** "red light, pedestrian crossing", or "" for a speed-only camera. */
+    fun controlsText(context: Context, db: CameraDb, i: Int): String =
+        db.controls(i).joinToString(", ") { controlName(context, it) }
+
+    /** Name plus what else it checks, e.g. "Lochin · pedestrian crossing". */
+    fun labelWithControls(context: Context, db: CameraDb, i: Int): String {
+        val controls = controlsText(context, db, i)
+        return if (controls.isEmpty()) label(context, db, i) else "${label(context, db, i)} · $controls"
     }
 
     /** Removes names saved by older versions, which let users rename types. */

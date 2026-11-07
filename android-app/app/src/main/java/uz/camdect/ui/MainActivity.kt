@@ -518,7 +518,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 !s.running -> getString(R.string.db_loaded, ready.db.version, ready.db.size)
                 !s.hasFix -> getString(R.string.no_gps)
                 target == null -> getString(R.string.no_camera)
-                else -> getString(R.string.camera_ahead, TypeLabels.label(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
+                else -> getString(R.string.camera_ahead, TypeLabels.labelWithControls(this, ready.db, target.camera), target.distanceM.toInt() / 10 * 10)
             }
         }
         showLimit(target?.speedLimitKmh ?: 0, target?.overspeed == true)
@@ -558,10 +558,12 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val code = db.typeCode(i)
         val limit = db.speedLimit[i].toInt()
         val heading = db.heading[i].toInt()
+        val controls = TypeLabels.controlsText(this, db, i)
+        val checks = if (controls.isEmpty()) getString(R.string.checks_speed_only) else getString(R.string.checks_also, controls)
         AlertDialog.Builder(this)
             .setTitle(TypeLabels.label(this, db, i))
             .setMessage(
-                getString(
+                checks + "\n" + getString(
                     R.string.type_dialog_msg,
                     if (limit > 0) "$limit ${getString(R.string.kmh)}" else getString(R.string.no_limit),
                     compassWord(heading.toDouble()), heading,
