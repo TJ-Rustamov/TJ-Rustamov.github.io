@@ -43,15 +43,20 @@
     <string name="service_off">Предупреждения выкл.: нажмите Старт</string>
     <string name="service_on">Предупреждения вкл.</string>
     <string name="log_empty">Журнал пуст.</string>
-    <string name="type_dialog_msg">Код типа %1$d (%2$d точек в базе)
-Ограничение: %3$s
-Контролирует направление %4$d°
-
-Назовите этот тип камеры (например, Lochin, Peshexod). Название используется для всех камер с кодом %1$d — на экране и голосом.</string>
+    <string name="type_dialog_msg">Ограничение: %1$s\nКонтролирует машины, едущие на %2$s (%3$d°)\nСнимает %4$s\nОпасная зона: %5$d м перед объективом\n\nКод типа %6$d (%7$d точек в базе)</string>
+    <string name="seen_front">спереди</string>
+    <string name="seen_rear">сзади (в спину)</string>
+    <string-array name="compass_words">
+        <item>север ↑</item>
+        <item>северо-восток ↗</item>
+        <item>восток →</item>
+        <item>юго-восток ↘</item>
+        <item>юг ↓</item>
+        <item>юго-запад ↙</item>
+        <item>запад ←</item>
+        <item>северо-запад ↖</item>
+    </string-array>
     <string name="no_limit">нет</string>
-    <string name="save">Сохранить</string>
-    <string name="reset">Сбросить</string>
-    <string name="cancel">Отмена</string>
     <string name="tts_test">Камера через 400 метров, ограничение 60</string>
     <string name="tts_named">%1$s через %2$d метров</string>
     <string name="tts_named_limit">%1$s через %2$d метров, ограничение %3$d</string>

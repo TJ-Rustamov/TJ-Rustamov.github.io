@@ -5,36 +5,27 @@ import androidx.preference.PreferenceManager
 import uz.camdect.R
 import uz.camdect.core.CameraDb
 
-/**
- * Names for Neoline type codes. The codes are undocumented, so the user names
- * them (e.g. "Lochin") by tapping a camera; until then we show the raw code.
- */
+/** Names for Neoline type codes. Fixed in the app; unknown codes show their number. */
 object TypeLabels {
-    private fun key(code: Int) = "type_label_$code"
+    val NAMES: Map<Int, String> = mapOf(
+        237 to "Lochin",
+        233 to "Hikvision",
+        165 to "MultaRadar CD",
+    )
 
-    /** User-given name for the code, or null. */
-    fun custom(context: Context, code: Int): String? =
-        PreferenceManager.getDefaultSharedPreferences(context).getString(key(code), null)?.takeIf { it.isNotBlank() }
+    fun name(code: Int): String? = NAMES[code]
 
     fun label(context: Context, db: CameraDb, i: Int): String {
         val code = db.typeCode(i)
-        return custom(context, code)
+        return name(code)
             ?: context.getString(if (db.speedLimit[i] > 0) R.string.type_camera else R.string.type_control, code)
     }
 
-    /** All user-given names, keyed by type code. */
-    fun all(context: Context): Map<Int, String> {
-        val out = HashMap<Int, String>()
-        for ((k, v) in PreferenceManager.getDefaultSharedPreferences(context).all) {
-            if (k.startsWith("type_label_") && v is String && v.isNotBlank()) k.removePrefix("type_label_").toIntOrNull()?.let { out[it] = v }
-        }
-        return out
-    }
-
-    fun set(context: Context, code: Int, name: String?) {
-        val sp = PreferenceManager.getDefaultSharedPreferences(context).edit()
-        if (name.isNullOrBlank()) sp.remove(key(code)) else sp.putString(key(code), name.trim())
-        sp.apply()
+    /** Removes names saved by older versions, which let users rename types. */
+    fun clearLegacyNames(context: Context) {
+        val sp = PreferenceManager.getDefaultSharedPreferences(context)
+        val old = sp.all.keys.filter { it.startsWith("type_label_") }
+        if (old.isNotEmpty()) sp.edit().apply { old.forEach { remove(it) } }.apply()
     }
 
     /** Number of points per type code, computed once per database. */

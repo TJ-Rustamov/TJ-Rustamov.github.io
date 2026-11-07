@@ -45,15 +45,20 @@
     <string name="service_off">Alerts off: tap Start</string>
     <string name="service_on">Alerts on</string>
     <string name="log_empty">Nothing logged yet.</string>
-    <string name="type_dialog_msg">Type code %1$d (%2$d points in database)
-Speed limit: %3$s
-Watches traffic heading %4$d°
-
-Name this camera type (e.g. Lochin, Peshexod). The name is used for every camera with code %1$d, on screen and by voice.</string>
+    <string name="type_dialog_msg">Speed limit: %1$s\nChecks cars going %2$s (%3$d°)\nSees them from %4$s\nDanger area: %5$d m ahead of the lens\n\nType code %6$d (%7$d points in database)</string>
+    <string name="seen_front">the front</string>
+    <string name="seen_rear">behind</string>
+    <string-array name="compass_words">
+        <item>north ↑</item>
+        <item>northeast ↗</item>
+        <item>east →</item>
+        <item>southeast ↘</item>
+        <item>south ↓</item>
+        <item>southwest ↙</item>
+        <item>west ←</item>
+        <item>northwest ↖</item>
+    </string-array>
     <string name="no_limit">none</string>
-    <string name="save">Save</string>
-    <string name="reset">Reset</string>
-    <string name="cancel">Cancel</string>
     <string name="tts_test">Camera in 400 metres, limit 60</string>
     <string name="tts_named">%1$s in %2$d metres</string>
     <string name="tts_named_limit">%1$s in %2$d metres, limit %3$d</string>

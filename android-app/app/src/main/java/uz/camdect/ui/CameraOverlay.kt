@@ -2,7 +2,9 @@ package uz.camdect.ui
 
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.graphics.Path
 import android.graphics.Point
+import android.graphics.RectF
 import android.view.MotionEvent
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
@@ -24,7 +26,7 @@ class CameraOverlay(
 ) : Overlay() {
     var index: CameraIndex? = null
     var highlighted: Int = -1
-    /** User names per type code (e.g. 237 -> "Lochin"), drawn under markers when zoomed in. */
+    /** Names per type code (e.g. 237 -> "Lochin"), drawn under markers when zoomed in. */
     var typeNames: Map<Int, String> = emptyMap()
     /** True when zoomed out too far to draw individual cameras. */
     var tooFar = false
@@ -39,9 +41,15 @@ class CameraOverlay(
     private val ring = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; color = 0xFFFFFFFF.toInt(); strokeWidth = 2 * density
     }
-    private val dir = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = 0xCC000000.toInt(); strokeWidth = 3 * density; strokeCap = Paint.Cap.ROUND
+    private val lens = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF1E2A38.toInt() }
+    private val cone = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x33E53935 }
+    private val coneHot = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0x66E53935 }
+    private val coneEdge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; color = 0x99E53935.toInt(); strokeWidth = 1.5f * density
     }
+    private val path = Path()
+    private val oval = RectF()
+    private var showCones = false
     private val text = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = 0xFFFFFFFF.toInt(); textAlign = Paint.Align.CENTER; textSize = 10 * density; isFakeBoldText = true
     }
@@ -69,6 +77,17 @@ class CameraOverlay(
         // geometry needs no correction, text is counter-rotated to stay upright.
         val rotation = mapView.mapOrientation
         showLabels = mapView.zoomLevelDouble >= LABEL_ZOOM
+        showCones = mapView.zoomLevelDouble >= CONE_ZOOM
+        if (showCones) {
+            // Cones first so every marker sits on top of all danger areas.
+            val pxPerMetre = proj.metersToPixels(1f)
+            for (k in 0 until visible.size) {
+                val i = visible[k]
+                geo.setCoords(db.latDeg(i), db.lonDeg(i))
+                proj.toPixels(geo, pt)
+                drawCone(canvas, db, i, pt.x.toFloat(), pt.y.toFloat(), db.coverageM(i) * pxPerMetre)
+            }
+        }
         for (k in 0 until visible.size) {
             val i = visible[k]
             geo.setCoords(db.latDeg(i), db.lonDeg(i))
@@ -77,11 +96,35 @@ class CameraOverlay(
         }
     }
 
+    /**
+     * Danger area: a wedge from the camera along the direction its lens points, as long as the
+     * coverage distance stored in the database. The database has no width, so it is fixed.
+     */
+    private fun drawCone(canvas: Canvas, db: CameraDb, i: Int, x: Float, y: Float, radius: Float) {
+        // Pixel space here is north-up (osmdroid rotates the canvas itself);
+        // Android arc angles start at east and run clockwise, so bearing b is angle b - 90.
+        val start = (db.lensBearing(i) - 90.0 - CONE_DEG / 2).toFloat()
+        oval.set(x - radius, y - radius, x + radius, y + radius)
+        path.reset()
+        path.moveTo(x, y)
+        path.arcTo(oval, start, CONE_DEG)
+        path.close()
+        canvas.drawPath(path, if (i == highlighted) coneHot else cone)
+        canvas.drawPath(path, coneEdge)
+    }
+
     private fun drawCamera(canvas: Canvas, db: CameraDb, i: Int, x: Float, y: Float, r: Float, rotation: Float) {
         if (i == highlighted) canvas.drawCircle(x, y, r * 2.2f, glow)
-        // Tick showing the direction of traffic the camera watches.
-        val a = Math.toRadians(db.heading[i].toDouble())
-        canvas.drawLine(x, y, x + (sin(a) * r * 2).toFloat(), y - (cos(a) * r * 2).toFloat(), dir)
+        // Lens: a dark triangle on the side of the marker the camera faces.
+        val a = Math.toRadians(db.lensBearing(i))
+        val ux = sin(a).toFloat()
+        val uy = -cos(a).toFloat()
+        path.reset()
+        path.moveTo(x + ux * r * 1.9f, y + uy * r * 1.9f)
+        path.lineTo(x + ux * r * 0.6f - uy * r * 0.75f, y + uy * r * 0.6f + ux * r * 0.75f)
+        path.lineTo(x + ux * r * 0.6f + uy * r * 0.75f, y + uy * r * 0.6f - ux * r * 0.75f)
+        path.close()
+        canvas.drawPath(path, lens)
         val limit = db.speedLimit[i].toInt()
         canvas.drawCircle(x, y, r, if (limit > 0) fill else fillNoLimit)
         canvas.drawCircle(x, y, r, ring)
@@ -120,6 +163,8 @@ class CameraOverlay(
     companion object {
         const val MIN_ZOOM = 11.0
         private const val LABEL_ZOOM = 15.0
+        private const val CONE_ZOOM = 14.0
+        private const val CONE_DEG = 20f
         private const val MAX_DRAWN = 2500
     }
 }

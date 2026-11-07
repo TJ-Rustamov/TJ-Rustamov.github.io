@@ -20,7 +20,7 @@ object NeolineDbParser {
 
     private val MAGIC = "BRMSC".toByteArray(Charsets.US_ASCII)
 
-    // XOR key for the decoded bytes of a 24-byte point record (bytes 13..23 are unused).
+    // XOR key for a 24-byte point record (bytes 13..20 and 22 are not decoded).
     internal val KEY = intArrayOf(
         0x00,                   // 0: type code (left raw)
         0xAE, 0xCB, 0x2C, 0x7D, // 1-4: latitude * 1e4
@@ -28,6 +28,10 @@ object NeolineDbParser {
         0x00, 0x13,             // 9-10: heading
         0xAC,                   // 11: flag
         0x8A,                   // 12: speed limit
+        0, 0, 0, 0, 0, 0, 0, 0, // 13-20: unused
+        0x6F,                   // 21: camera flags (bit 2 = rear-facing)
+        0xEF,                   // 22: unknown
+        0x78,                   // 23: coverage distance / 10 m
     )
 
     @Throws(IOException::class)
@@ -50,6 +54,8 @@ object NeolineDbParser {
         val speed = ShortArray(count)
         val type = ByteArray(count)
         val flag = ByteArray(count)
+        val camFlags = ByteArray(count)
+        val range = ShortArray(count)
 
         var n = 0
         for (r in 0 until count) {
@@ -61,11 +67,13 @@ object NeolineDbParser {
             flag[n] = field(bytes, o, 11, 1).toByte()
             speed[n] = field(bytes, o, 12, 1).toShort()
             type[n] = bytes[o]
+            camFlags[n] = field(bytes, o, 21, 1).toByte()
+            range[n] = (field(bytes, o, 23, 1) * 10).toShort()
             n++
         }
         return CameraDb(
             version, lat.copyOf(n), lon.copyOf(n), heading.copyOf(n),
-            speed.copyOf(n), type.copyOf(n), flag.copyOf(n),
+            speed.copyOf(n), type.copyOf(n), flag.copyOf(n), camFlags.copyOf(n), range.copyOf(n),
         )
     }
 

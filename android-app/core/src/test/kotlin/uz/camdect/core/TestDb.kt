@@ -2,7 +2,10 @@ package uz.camdect.core
 
 /** Builds a Neoline-format file in memory (the inverse of [NeolineDbParser]). */
 object TestDb {
-    data class Point(val lat: Double, val lon: Double, val heading: Int, val speed: Int, val type: Int = 0xA5)
+    data class Point(
+        val lat: Double, val lon: Double, val heading: Int, val speed: Int, val type: Int = 0xA5,
+        val rear: Boolean = false, val rangeM: Int = 400,
+    )
 
     fun build(points: List<Point>, version: String = "241026"): ByteArray {
         val h = NeolineDbParser.HEADER_SIZE
@@ -14,12 +17,14 @@ object TestDb {
         putLe(out, h + 23 * r, points.size)
         points.sortedByDescending { it.lat }.forEachIndexed { n, p ->
             val o = h + (NeolineDbParser.FIRST_POINT_RECORD + n) * r
-            val plain = IntArray(13)
+            val plain = IntArray(24)
             plain[0] = p.type
             putBe(plain, 1, 4, Math.round(p.lat * 10_000).toInt())
             putBe(plain, 5, 4, Math.round(p.lon * 10_000).toInt())
             putBe(plain, 9, 2, p.heading)
             putBe(plain, 12, 1, p.speed)
+            plain[21] = if (p.rear) 0x04 else 0
+            plain[23] = p.rangeM / 10
             for (i in plain.indices) out[o + i] = (plain[i] xor NeolineDbParser.KEY[i]).toByte()
         }
         return out

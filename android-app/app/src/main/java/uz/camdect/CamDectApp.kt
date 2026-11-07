@@ -4,12 +4,14 @@ import android.app.Application
 import androidx.preference.PreferenceManager
 import org.osmdroid.config.Configuration
 import uz.camdect.data.CameraRepository
+import uz.camdect.data.TypeLabels
 import java.io.File
 
 class CamDectApp : Application() {
     override fun onCreate() {
         super.onCreate()
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false)
+        TypeLabels.clearLegacyNames(this)
         configureOsmdroid()
         CameraRepository.load(this)
     }

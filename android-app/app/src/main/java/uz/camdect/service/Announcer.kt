@@ -83,7 +83,7 @@ class Announcer(private val context: Context, private val prefs: Prefs) {
         if (prefs.voice) {
             val metres = roundDistance(t.distanceM)
             val s = voiceStrings()
-            val name = TypeLabels.custom(context, db.typeCode(t.camera))
+            val name = TypeLabels.name(db.typeCode(t.camera))
             val withLimit = t.speedLimitKmh > 0 && event.firstForCamera
             val text = when {
                 name != null && withLimit -> s.getString(R.string.tts_named_limit, name, metres, t.speedLimitKmh)

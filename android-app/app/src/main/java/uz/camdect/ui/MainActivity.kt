@@ -30,7 +30,6 @@ import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -240,7 +239,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val density = resources.displayMetrics.density
         map.overlays.add(RotationGestureOverlay(map).apply { isEnabled = true })
         cameraOverlay = CameraOverlay(density) { i -> showCamera(i) }
-        cameraOverlay.typeNames = TypeLabels.all(this)
+        cameraOverlay.typeNames = TypeLabels.NAMES
         map.overlays.add(cameraOverlay)
         positionOverlay = PositionOverlay(density)
         map.overlays.add(positionOverlay)
@@ -553,40 +552,31 @@ class MainActivity : AppCompatActivity(), LocationListener {
         }
     }
 
-    /** Camera details + naming its type code (e.g. "Lochin"). */
+    /** Camera details: limit, which way it checks, from the front or behind, danger area. */
     private fun showCamera(i: Int) {
         val db = CameraRepository.ready?.db ?: return
         val code = db.typeCode(i)
         val limit = db.speedLimit[i].toInt()
-        val input = EditText(this).apply {
-            setSingleLine()
-            setText(TypeLabels.custom(this@MainActivity, code) ?: "")
-            hint = getString(R.string.type_camera, code)
-        }
-        val pad = (20 * resources.displayMetrics.density).toInt()
-        val box = android.widget.FrameLayout(this).apply { setPadding(pad, 0, pad, 0); addView(input) }
+        val heading = db.heading[i].toInt()
         AlertDialog.Builder(this)
             .setTitle(TypeLabels.label(this, db, i))
             .setMessage(
                 getString(
-                    R.string.type_dialog_msg, code, TypeLabels.count(db, code),
+                    R.string.type_dialog_msg,
                     if (limit > 0) "$limit ${getString(R.string.kmh)}" else getString(R.string.no_limit),
-                    db.heading[i].toInt(),
+                    compassWord(heading.toDouble()), heading,
+                    getString(if (db.isRear(i)) R.string.seen_rear else R.string.seen_front),
+                    db.coverageM(i), code, TypeLabels.count(db, code),
                 )
             )
-            .setView(box)
-            .setPositiveButton(R.string.save) { _, _ -> renameType(code, input.text.toString()) }
-            .setNeutralButton(R.string.reset) { _, _ -> renameType(code, null) }
-            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(android.R.string.ok, null)
             .show()
     }
 
-    private fun renameType(code: Int, name: String?) {
-        TypeLabels.set(this, code, name)
-        cameraOverlay.typeNames = cameraOverlay.typeNames.toMutableMap().apply {
-            if (name.isNullOrBlank()) remove(code) else put(code, name.trim())
-        }
-        map.invalidate()
+    /** "southwest ↙" for 227°. */
+    private fun compassWord(bearing: Double): String {
+        val words = resources.getStringArray(R.array.compass_words)
+        return words[(((bearing % 360 + 360) % 360 + 22.5) / 45).toInt() % 8]
     }
 
     // --- Permissions / service ---
