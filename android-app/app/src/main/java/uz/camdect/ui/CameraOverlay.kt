@@ -11,6 +11,7 @@ import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Overlay
 import uz.camdect.core.CameraDb
 import uz.camdect.core.CameraIndex
+import uz.camdect.core.Control
 import uz.camdect.core.IntList
 import kotlin.math.cos
 import kotlin.math.hypot
@@ -49,6 +50,16 @@ class CameraOverlay(
     private val coneEdge = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE; color = 0x99E53935.toInt(); strokeWidth = 1.5f * density
     }
+    private val badgeBg = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF263238.toInt() }
+    private val badgeBlue = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF1565C0.toInt() }
+    private val badgeWhite = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFFFFF.toInt() }
+    private val badgeRed = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFE53935.toInt() }
+    private val badgeRedLine = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; color = 0xFFE53935.toInt(); strokeWidth = 1.6f * density
+    }
+    private val badgeYellow = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFFFFC107.toInt() }
+    private val badgeGreen = Paint(Paint.ANTI_ALIAS_FLAG).apply { color = 0xFF43A047.toInt() }
+    private val badgeRect = RectF()
     private val path = Path()
     private val oval = RectF()
     private var showCones = false
@@ -133,6 +144,7 @@ class CameraOverlay(
         canvas.save()
         canvas.rotate(-rotation, x, y)
         if (limit > 0) canvas.drawText(limit.toString(), x, y + text.textSize / 3, text)
+        drawBadges(canvas, db, i, x + r * 0.8f, y - r * 1.9f, r * 0.95f)
         if (showLabels) {
             if (labelCacheDb !== db) { labelCache.clear(); labelCacheDb = db }
             val name = labelCache.getOrPut(i) { labelFor(db, i) }
@@ -141,6 +153,43 @@ class CameraOverlay(
             canvas.drawText(name, x, ty, label)
         }
         canvas.restore()
+    }
+
+    /** Small icons above the marker for what the camera checks besides speed. */
+    private fun drawBadges(canvas: Canvas, db: CameraDb, i: Int, left: Float, top: Float, size: Float) {
+        var bx = left
+        val gap = size * 0.2f
+        if (db.hasControl(i, Control.RED_LIGHT)) {
+            // Traffic light: dark body with red / yellow / green lamps.
+            badgeRect.set(bx, top, bx + size * 0.6f, top + size * 1.4f)
+            canvas.drawRoundRect(badgeRect, size * 0.15f, size * 0.15f, badgeBg)
+            val cx = bx + size * 0.3f
+            val lr = size * 0.17f
+            canvas.drawCircle(cx, top + size * 0.28f, lr, badgeRed)
+            canvas.drawCircle(cx, top + size * 0.7f, lr, badgeYellow)
+            canvas.drawCircle(cx, top + size * 1.12f, lr, badgeGreen)
+            bx += size * 0.6f + gap
+        }
+        if (db.hasControl(i, Control.CROSSWALK)) {
+            // Zebra: blue square with white stripes.
+            badgeRect.set(bx, top, bx + size, top + size)
+            canvas.drawRoundRect(badgeRect, size * 0.15f, size * 0.15f, badgeBlue)
+            val stripe = size / 7f
+            for (k in 0 until 3) {
+                val sx = bx + stripe * (1 + k * 2)
+                canvas.drawRect(sx, top + size * 0.2f, sx + stripe, top + size * 0.8f, badgeWhite)
+            }
+            bx += size + gap
+        }
+        if (db.hasControl(i, Control.NO_STOPPING)) {
+            // No stopping: blue disc, red ring and red cross.
+            val c = size / 2
+            canvas.drawCircle(bx + c, top + c, c, badgeBlue)
+            canvas.drawCircle(bx + c, top + c, c - badgeRedLine.strokeWidth / 2, badgeRedLine)
+            val d = c * 0.62f
+            canvas.drawLine(bx + c - d, top + c - d, bx + c + d, top + c + d, badgeRedLine)
+            canvas.drawLine(bx + c + d, top + c - d, bx + c - d, top + c + d, badgeRedLine)
+        }
     }
 
     override fun onSingleTapConfirmed(e: MotionEvent, mapView: MapView): Boolean {
