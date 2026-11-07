@@ -239,7 +239,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val density = resources.displayMetrics.density
         map.overlays.add(RotationGestureOverlay(map).apply { isEnabled = true })
         cameraOverlay = CameraOverlay(density) { i -> showCamera(i) }
-        cameraOverlay.typeNames = TypeLabels.NAMES
+        cameraOverlay.labelFor = { db, i -> TypeLabels.labelWithControls(this, db, i) }
         map.overlays.add(cameraOverlay)
         positionOverlay = PositionOverlay(density)
         map.overlays.add(positionOverlay)
