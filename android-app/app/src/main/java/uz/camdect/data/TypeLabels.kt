@@ -12,6 +12,7 @@ object TypeLabels {
         243 to "AutoCon",
         236 to "Cordon PRO",
         238 to "Skat",
+        168 to "Strelka",
         233 to "Hikvision",
         165 to "MultaRadar CD",
     )
