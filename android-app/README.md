@@ -19,9 +19,10 @@ and supports Android 5.0 (2014) up to current phones.
   - `AlertEngine`: alerts only for cameras **ahead of you** that face **your direction of travel**. Alert distance grows with speed, and alerts step up at about 400 m and 150 m.
 - `app/`:
   - `RadarService`: a foreground service. It reads the phone's GPS chip directly through `LocationManager`, so it needs neither Google Play services nor internet.
-  - Alerts are spoken by the phone's offline text-to-speech engine (Russian or English), with a beep and vibration.
-  - The map uses osmdroid with OpenStreetMap tiles. Every tile you view is cached and kept for a year, so the areas you've browsed or driven work offline.
-  - For a full offline map, import an `.mbtiles` or `.sqlite` tile archive with **⋮ → Import offline map**.
+  - The app speaks O'zbekcha (lotin), Ўзбекча (кирилл), Русский and English; you choose in Settings. Alerts use the phone's offline text-to-speech engine, with a beep and vibration. Phones without an Uzbek voice say the Uzbek phrases in Cyrillic with the Russian voice.
+  - The map is MapLibre with OpenFreeMap vector tiles, so street names stay upright when the map turns. Up to 500 MB of the areas you view are kept for offline use.
+  - For a full offline map of an area, use **⋮ → Offline maps** to download what is on screen.
+  - The **Kamera ma'lumotlari** tab lists the camera types with short descriptions.
   - Camera alerts never need the map or internet.
 
 ## Build
