@@ -428,7 +428,7 @@ class MapController(
     }
 
     companion object {
-        const val STYLE_URL = "https://tiles.openfreemap.org/styles/liberty"
+        const val STYLE_URL = uz.camdect.data.MapPrefetcher.STYLE_URL
         private val TASHKENT = LatLng(41.3111, 69.2797)
 
         private const val SRC_CAMS = "camdect-cams"
@@ -452,6 +452,7 @@ class MapController(
         private const val CONE_DEG = 20.0
         private const val MAX_CAMERAS = 1500
         const val MIN_OFFLINE_ZOOM = 10.0
-        const val MAX_OFFLINE_ZOOM = 15.0
+        /** OpenFreeMap vector tiles stop at 14; closer zooms are drawn from them. */
+        const val MAX_OFFLINE_ZOOM = 14.0
     }
 }

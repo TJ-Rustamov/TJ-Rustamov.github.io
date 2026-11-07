@@ -56,6 +56,7 @@ import uz.camdect.core.Geo
 import uz.camdect.core.HeadingFilter
 import uz.camdect.data.AppLanguage
 import uz.camdect.data.CameraRepository
+import uz.camdect.data.MapPrefetcher
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
 import uz.camdect.service.Announcer
@@ -192,6 +193,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch { CameraRepository.state.collect { onRepoState(it) } }
                 launch { DriveState.flow.collect { onDriveState(it) } }
+                launch { MapPrefetcher.get(this@MainActivity).progress.collect { updateSubStatus() } }
             }
         }
 
@@ -370,6 +372,8 @@ class MainActivity : AppCompatActivity(), LocationListener {
         speedKmh = (speedMps * 3.6).toInt()
         course = if (location.hasBearing() && speedMps >= GPS_COURSE_MIN_MPS) location.bearing.toDouble() else Double.NaN
         headingFilter.onGps(course, speedMps)
+        // First fix ever: start downloading the map of this area for offline use.
+        if (mapController != null) MapPrefetcher.get(this).onLocation(location.latitude, location.longitude)
         if (declination.isNaN()) declination = GeomagneticField(
             location.latitude.toFloat(), location.longitude.toFloat(), location.altitude.toFloat(), System.currentTimeMillis()
         ).declination
@@ -537,7 +541,9 @@ class MainActivity : AppCompatActivity(), LocationListener {
         val running = DriveState.flow.value.running
         val alerts = getString(if (running) R.string.service_on else R.string.service_off)
         val f = fix
-        subStatusView.text = if (f == null) alerts else getString(R.string.gps_accuracy, f.accuracy.toInt(), alerts)
+        val base = if (f == null) alerts else getString(R.string.gps_accuracy, f.accuracy.toInt(), alerts)
+        val dl = MapPrefetcher.get(this).progress.value
+        subStatusView.text = if (dl == null) base else base + "\n" + getString(R.string.map_downloading, dl.percent)
     }
 
     private fun showLimit(limit: Int, overspeed: Boolean) {
@@ -599,7 +605,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
                 .setNegativeButton(R.string.cancel, null)
             if (!tooBig) builder.setPositiveButton(R.string.offline_download) { _, _ -> startDownload(bounds) }
             if (count > 0) builder.setNeutralButton(R.string.offline_delete) { _, _ ->
-                mc.deleteDownloads { n -> Toast.makeText(this, getString(R.string.offline_deleted, n), Toast.LENGTH_LONG).show() }
+                mc.deleteDownloads { n ->
+                    MapPrefetcher.get(this).forgetAll()
+                    Toast.makeText(this, getString(R.string.offline_deleted, n), Toast.LENGTH_LONG).show()
+                }
             }
             builder.show()
         }

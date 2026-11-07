@@ -90,6 +90,9 @@
     <string name="offline_too_big">Bu hudud juda katta. Avval shahar yoki viloyatga yaqinlashtiring.</string>
     <string name="no_gl">Bu telefon grafikasi xaritani ko\'rsatish uchun eski. Kamera ogohlantirishlari baribir ishlaydi.</string>
     <string name="map_no_internet">Xarita hali yuklanmagan: bir marta internetga ulaning yoki hududni yuklab oling. Ogohlantirishlar oflayn ishlaydi.</string>
+    <string name="map_downloading">Oflayn xarita yuklanmoqda… %1$d%%</string>
+    <string name="pref_auto_map">Xaritani avtomatik yuklab olish</string>
+    <string name="pref_auto_map_summary">Birinchi ishga tushirishda atrofingiz, keyin haydash paytida oldindagi yo\'l: xarita internetsiz ishlaydi.</string>
     <string name="cam_165">MultaRadar CD</string>
     <string name="desc_165">Radar-detektorlardan yashirinish uchun mo\'ljallangan kam quvvatli ko\'chma tripod radar; tezlikni o\'lchaydi.</string>
     <string name="cam_168">Strelka</string>

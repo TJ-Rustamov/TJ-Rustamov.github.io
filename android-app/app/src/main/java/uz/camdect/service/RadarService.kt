@@ -27,6 +27,7 @@ import uz.camdect.R
 import uz.camdect.core.AlertEngine
 import uz.camdect.data.AppLanguage
 import uz.camdect.data.CameraRepository
+import uz.camdect.data.MapPrefetcher
 import uz.camdect.data.Prefs
 import uz.camdect.data.TypeLabels
 import uz.camdect.ui.MainActivity
@@ -108,6 +109,8 @@ class RadarService : Service(), LocationListener, SharedPreferences.OnSharedPref
         }
         val speedMps = if (location.hasSpeed()) location.speed.toDouble() else 0.0
         val course = if (location.hasBearing()) location.bearing.toDouble() else Double.NaN
+        // Download the map around us before we get there, so the map works with no signal.
+        MapPrefetcher.get(this).onLocation(location.latitude, location.longitude)
 
         var target: AlertEngine.Target? = null
         var opposite: AlertEngine.Target? = null

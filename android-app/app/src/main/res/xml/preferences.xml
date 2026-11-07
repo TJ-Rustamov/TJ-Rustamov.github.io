@@ -18,6 +18,8 @@
         <SwitchPreferenceCompat app:key="ignore_no_limit" app:title="@string/pref_ignore_no_limit" app:defaultValue="false" app:iconSpaceReserved="false" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/pref_cat_map" app:iconSpaceReserved="false">
+        <SwitchPreferenceCompat app:key="auto_map" app:title="@string/pref_auto_map" app:summary="@string/pref_auto_map_summary"
+            app:defaultValue="true" app:iconSpaceReserved="false" />
         <SwitchPreferenceCompat app:key="keep_screen_on" app:title="@string/pref_keep_screen" app:defaultValue="true" app:iconSpaceReserved="false" />
     </PreferenceCategory>
     <PreferenceCategory app:title="@string/pref_cat_db" app:iconSpaceReserved="false">
