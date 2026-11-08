@@ -83,8 +83,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private lateinit var driveButton: Button
     private lateinit var infoScroll: ScrollView
     private lateinit var infoList: LinearLayout
-    private lateinit var tabMap: TextView
-    private lateinit var tabInfo: TextView
 
     private var repoState: CameraRepository.State = CameraRepository.State.Loading
     private var startAfterPermission = false
@@ -92,6 +90,10 @@ class MainActivity : AppCompatActivity(), LocationListener {
     private var mode = ViewMode.HEADING_UP
     private var followMode = ViewMode.HEADING_UP
     private var infoTabShown = false
+    // Back closes the camera info page; enabled only while it is open.
+    private val closeInfoOnBack = object : OnBackPressedCallback(false) {
+        override fun handleOnBackPressed() = showInfoTab(false)
+    }
 
     // Latest fix from our own GPS listener (UI only; alerts come from RadarService).
     private var fix: Location? = null
@@ -164,8 +166,6 @@ class MainActivity : AppCompatActivity(), LocationListener {
         driveButton = findViewById(R.id.btn_drive)
         infoScroll = findViewById(R.id.info_scroll)
         infoList = findViewById(R.id.info_list)
-        tabMap = findViewById(R.id.tab_map)
-        tabInfo = findViewById(R.id.tab_info)
         applyInsets()
 
         followMode = if (prefs.sp.getString("follow_mode", "heading") == "north") ViewMode.NORTH_UP else ViewMode.HEADING_UP
@@ -179,13 +179,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         findViewById<Button>(R.id.btn_center).setOnClickListener { setMode(followMode) }
         compass.setOnClickListener { onCompassTap() }
         findViewById<ImageButton>(R.id.btn_menu).setOnClickListener { showMenu(it) }
-        tabMap.setOnClickListener { showInfoTab(false) }
-        tabInfo.setOnClickListener { showInfoTab(true) }
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                if (infoTabShown) showInfoTab(false) else { isEnabled = false; onBackPressedDispatcher.onBackPressed() }
-            }
-        })
+        onBackPressedDispatcher.addCallback(this, closeInfoOnBack)
         updateModeUi()
         showInfoTab(false)
 
@@ -223,29 +217,27 @@ class MainActivity : AppCompatActivity(), LocationListener {
             bottom.setPadding(bars.left, 0, bars.right, bars.bottom)
             // Info list scrolls between the status bar and the tab bar.
             val pad = (16 * density).toInt()
-            infoList.setPadding(pad, bars.top + pad, pad, bars.bottom + (64 * density).toInt())
+            infoList.setPadding(pad, bars.top + pad, pad, bars.bottom + pad)
             top.requestLayout()
             insets
         }
     }
 
+    /** Camera info page (opened from the ⋮ menu) over the map. */
     private fun showInfoTab(show: Boolean) {
         infoTabShown = show
+        closeInfoOnBack.isEnabled = show
         infoScroll.visibility = if (show) View.VISIBLE else View.GONE
         val mapUi = if (show) View.GONE else View.VISIBLE
         findViewById<View>(R.id.top_area).visibility = mapUi
-        findViewById<View>(R.id.drive_buttons).visibility = mapUi
+        findViewById<View>(R.id.bottom_area).visibility = mapUi
         if (show) {
             hintView.visibility = View.GONE
-            CameraInfoView.fill(infoList, CameraRepository.ready?.db)
+            CameraInfoView.fill(infoList, CameraRepository.ready?.db) { showInfoTab(false) }
             infoScroll.scrollTo(0, 0)
         } else {
             onMapMoved()
         }
-        val active = ContextCompat.getColor(this, R.color.tab_active)
-        val idle = ContextCompat.getColor(this, R.color.panel_text)
-        tabMap.setTextColor(if (show) idle else active)
-        tabInfo.setTextColor(if (show) active else idle)
     }
 
     // --- Map ---
@@ -507,7 +499,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
             is CameraRepository.State.Ready -> {
                 mapController?.setCameras(state.index)
                 onDriveState(DriveState.flow.value)
-                if (infoTabShown) CameraInfoView.fill(infoList, state.db)
+                if (infoTabShown) CameraInfoView.fill(infoList, state.db) { showInfoTab(false) }
             }
         }
         onMapMoved()
@@ -702,6 +694,7 @@ class MainActivity : AppCompatActivity(), LocationListener {
         popup.menu.findItem(R.id.action_offline)?.isVisible = mapController != null
         popup.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_info -> showInfoTab(true)
                 R.id.action_import_db -> pickDb.launch(arrayOf("*/*"))
                 R.id.action_offline -> showOfflineDialog()
                 R.id.action_settings -> startActivity(Intent(this, SettingsActivity::class.java))

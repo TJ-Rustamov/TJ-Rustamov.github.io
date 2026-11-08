@@ -8,11 +8,13 @@ import android.graphics.RectF
 
 /** Bitmaps for the map's symbol layers, drawn in code so they scale with screen density. */
 object MapIcons {
-    const val CAR = "car"
-    const val LENS = "lens"
-    const val RED_LIGHT = "badge-red-light"
-    const val CROSSWALK = "badge-crosswalk"
-    const val NO_STOPPING = "badge-no-stopping"
+    // Prefixed: the map style ships its own sprites (it has a "car" icon) and a clash
+    // silently replaces our bitmap.
+    const val CAR = "camdect-arrow"
+    const val LENS = "camdect-lens"
+    const val RED_LIGHT = "camdect-badge-red-light"
+    const val CROSSWALK = "camdect-badge-crosswalk"
+    const val NO_STOPPING = "camdect-badge-no-stopping"
 
     private fun paint(color: Int, stroke: Float = 0f) = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         this.color = color

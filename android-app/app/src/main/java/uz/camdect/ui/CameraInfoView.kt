@@ -18,9 +18,10 @@ import uz.camdect.data.TypeLabels
 
 /** "Kamera ma'lumotlari" tab: every named camera type and every extra check, with short descriptions. */
 object CameraInfoView {
-    fun fill(list: LinearLayout, db: CameraDb?) {
+    fun fill(list: LinearLayout, db: CameraDb?, onClose: () -> Unit) {
         val c = list.context
         list.removeAllViews()
+        list.addView(titleBar(c, onClose))
         list.addView(header(c, c.getString(R.string.info_header)))
         for ((code, nameRes, descRes) in TypeLabels.KNOWN) {
             val sub = db?.let { c.getString(R.string.info_points, TypeLabels.count(it, code)) }
@@ -39,6 +40,32 @@ object CameraInfoView {
             val name = c.getString(TypeLabels.controlRes(ctl)).replaceFirstChar { it.uppercase() }
             list.addView(row(c, icon, name, null, c.getString(desc)))
         }
+    }
+
+    /** Page title with a close (✕) button back to the map. */
+    private fun titleBar(c: Context, onClose: () -> Unit): View {
+        val d = c.resources.displayMetrics.density
+        val bar = LinearLayout(c).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+        }
+        bar.addView(TextView(c).apply {
+            setText(R.string.tab_info)
+            textSize = 22f
+            setTypeface(typeface, Typeface.BOLD)
+            setTextColor(ContextCompat.getColor(c, R.color.info_text))
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        })
+        bar.addView(TextView(c).apply {
+            text = "✕"
+            textSize = 24f
+            gravity = Gravity.CENTER
+            setTextColor(ContextCompat.getColor(c, R.color.info_text))
+            contentDescription = c.getString(android.R.string.cancel)
+            layoutParams = LinearLayout.LayoutParams((48 * d).toInt(), (48 * d).toInt())
+            setOnClickListener { onClose() }
+        })
+        return bar
     }
 
     /** Same look as the map marker: red circle (blue for points without a speed limit). */
